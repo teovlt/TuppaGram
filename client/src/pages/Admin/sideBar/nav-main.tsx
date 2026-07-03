@@ -1,8 +1,6 @@
 import { type LucideIcon } from "lucide-react";
 import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useConfigContext } from "@/contexts/configContext";
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 export function NavMain({
@@ -22,17 +20,6 @@ export function NavMain({
   const styleDefault = "px-4 py-3 font-light flex items-center justify-center gap-3";
   const styleActive = ` mx-4 my-3 flex items-center justify-center gap-3 text-primary border-b border-accent`;
   const { t } = useTranslation();
-  const { getConfigValue } = useConfigContext();
-  const [configValues, setConfigValues] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    const fetchConfigValues = async () => {
-      const values = await getConfigValue(["APP_NAME"]);
-      setConfigValues(values);
-    };
-
-    fetchConfigValues();
-  }, [getConfigValue]);
 
   function handleClick(url: string) {
     if (isMobile) {
@@ -43,7 +30,7 @@ export function NavMain({
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>{configValues["APP_NAME"]}</SidebarGroupLabel>
+      <SidebarGroupLabel>Tuppagram</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <SidebarMenuItem key={item.title} onClick={() => handleClick(item.url)}>

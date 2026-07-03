@@ -20,26 +20,15 @@ import {
 } from "../ui/dropdown-menu";
 import { useLogout } from "@/hooks/useLogout";
 import { AvatarWithStatusCell } from "@/components/customs/avatarStatusCell";
-import { useConfigContext } from "../../contexts/configContext";
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [configValues, setConfigValues] = useState<Record<string, string>>({});
   const menuRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { logout, loading } = useLogout();
   const { authUser } = useAuthContext();
-  const { getConfigValue } = useConfigContext();
-
-  useEffect(() => {
-    const fetchConfigValues = async () => {
-      const values = await getConfigValue(["APP_NAME"]);
-      setConfigValues(values);
-    };
-    fetchConfigValues();
-  }, [getConfigValue]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -103,7 +92,7 @@ export const Navbar = () => {
         {/* Desktop */}
         <div className="hidden select-none md:flex items-center justify-between p-4 px-8 text-accent">
           <div className="text-3xl font-extrabold">
-            <Link to="/">{configValues["APP_NAME"]}</Link>
+            <Link to="/">Tuppagram</Link>
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
@@ -173,7 +162,7 @@ export const Navbar = () => {
         {/* Mobile */}
         <div className="flex items-center justify-between p-4 md:hidden">
           <div className="text-3xl font-extrabold text-accent">
-            <Link to="/">{configValues["APP_NAME"]}</Link>
+            <Link to="/">Tuppagram</Link>
           </div>
           <Menu onClick={() => setIsOpen(!isOpen)} className="cursor-pointer" />
         </div>

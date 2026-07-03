@@ -44,7 +44,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
   const userId = req.userId;
 
   if (!email || !username || !password || !name || !forename) {
-    res.status(400).json({ error: "server.global.errors.missing_fields" });
+    res.status(400).json({ error: "Champs requis manquants" });
     return;
   }
 
@@ -53,16 +53,16 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
     const existingUserByUsername = await User.findOne({ username: username.toLowerCase() });
 
     if (existingUserByEmail) {
-      res.status(409).json({ error: "server.users.errors.email_taken" });
+      res.status(409).json({ error: "Cet email est déjà utilisé" });
       return;
     }
     if (existingUserByUsername) {
-      res.status(409).json({ error: "server.users.errors.username_taken" });
+      res.status(409).json({ error: "Ce nom d'utilisateur est déjà pris" });
       return;
     }
 
     if (role && !Object.values(userRoles).includes(role)) {
-      res.status(400).json({ error: "server.users.errors.invalid_role" });
+      res.status(400).json({ error: "Rôle invalide" });
       return;
     }
 
@@ -89,7 +89,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
       level: logLevels.INFO,
     });
 
-    res.status(201).json({ user: userWithoutPassword, message: "server.users.messages.user_created" });
+    res.status(201).json({ user: userWithoutPassword, message: "Utilisateur créé avec succès" });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -110,7 +110,7 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
       const existingUserByEmail = await User.findOne({ email: email.toLowerCase(), _id: { $ne: id } });
       console.log(email.toLowerCase());
       if (existingUserByEmail) {
-        res.status(409).json({ error: "server.users.errors.email_taken" });
+        res.status(409).json({ error: "Cet email est déjà utilisé" });
         return;
       }
     }
@@ -118,7 +118,7 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
     if (username) {
       const existingUserByUsername = await User.findOne({ username: username.toLowerCase(), _id: { $ne: id } });
       if (existingUserByUsername) {
-        res.status(409).json({ error: "server.users.errors.username_taken" });
+        res.status(409).json({ error: "Ce nom d'utilisateur est déjà pris" });
         return;
       }
     }
@@ -127,7 +127,7 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
 
     if (actionUser.role == userRoles.ADMIN) {
       if (role && !Object.values(userRoles).includes(role)) {
-        res.status(400).json({ error: "server.users.errors.invalid_role" });
+        res.status(400).json({ error: "Rôle invalide" });
         return;
       }
 
@@ -156,14 +156,14 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
       { new: true },
     );
     if (!user) {
-      res.status(404).json({ error: "server.global.errors.no_such_user" });
+      res.status(404).json({ error: "Aucun utilisateur trouvé" });
       return;
     }
 
     const userObj = user.toObject();
     const { password: _password, ...userWithoutPassword } = userObj;
 
-    res.status(200).json({ user: userWithoutPassword, message: "server.users.messages.user_updated" });
+    res.status(200).json({ user: userWithoutPassword, message: "Utilisateur mis à jour avec succès" });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -179,7 +179,7 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
   try {
     const user = await User.findOneAndDelete({ _id: id });
     if (!user) {
-      res.status(400).json({ error: "server.global.errors.no_such_user" });
+      res.status(400).json({ error: "Aucun utilisateur trouvé" });
       return;
     }
 

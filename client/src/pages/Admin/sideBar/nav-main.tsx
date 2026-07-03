@@ -1,7 +1,6 @@
 import { type LucideIcon } from "lucide-react";
 import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 
 export function NavMain({
   items,
@@ -19,7 +18,6 @@ export function NavMain({
   const isActive = (path: string, includeSubroutes = false) => (includeSubroutes ? pathname.startsWith(path) : pathname === path);
   const styleDefault = "px-4 py-3 font-light flex items-center justify-center gap-3";
   const styleActive = ` mx-4 my-3 flex items-center justify-center gap-3 text-primary border-b border-accent`;
-  const { t } = useTranslation();
 
   function handleClick(url: string) {
     if (isMobile) {
@@ -36,7 +34,7 @@ export function NavMain({
           <SidebarMenuItem key={item.title} onClick={() => handleClick(item.url)}>
             <SidebarMenuButton tooltip={item.title} className="cursor-pointer">
               {item.icon && <item.icon />}
-              <span className={`${isActive(item.url, true) ? styleActive : styleDefault} `}>{t(`pages.admin.${item.title}`)}</span>
+              <span className={`${isActive(item.url, true) ? styleActive : styleDefault} `}>{item.title}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         ))}

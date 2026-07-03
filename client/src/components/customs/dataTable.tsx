@@ -25,7 +25,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { EllipsisVertical, Plus, RefreshCw, Trash } from "lucide-react";
 import { Input } from "../ui/input";
 import { DialogHeader, DialogFooter, Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { useTranslation } from "react-i18next";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -57,8 +56,6 @@ export function DataTable<TData, TValue>({
     pageSize: 10,
   });
 
-  const { t } = useTranslation();
-
   useEffect(() => {
     fetchData(pagination.pageIndex, pagination.pageSize);
   }, [pagination.pageIndex, pagination.pageSize]);
@@ -89,7 +86,7 @@ export function DataTable<TData, TValue>({
         {/* Search */}
         <div className="w-full md:flex md:flex-row md:items-center md:justify-start md:gap-4">
           <Input
-            placeholder={t(`components.dataTable.filters.${searchElement}`)}
+            placeholder="Rechercher..."
             value={(table.getColumn(searchElement)?.getFilterValue() as string) ?? ""}
             onChange={(event) => table.getColumn(searchElement)?.setFilterValue(event.target.value)}
             className="w-full md:w-auto md:max-w-xs"
@@ -99,7 +96,7 @@ export function DataTable<TData, TValue>({
           <div className="hidden md:flex md:items-center md:gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline">{t("components.dataTable.columns")}</Button>
+                <Button variant="outline">Colonnes</Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 {table
@@ -108,11 +105,10 @@ export function DataTable<TData, TValue>({
                   .map((column) => (
                     <DropdownMenuCheckboxItem
                       key={column.id}
-                      // className="capitalize"
                       checked={column.getIsVisible()}
                       onCheckedChange={(value) => column.toggleVisibility(!!value)}
                     >
-                      {t(`components.dataTable.columns_list.${column.id}`)}
+                      {column.id}
                     </DropdownMenuCheckboxItem>
                   ))}
               </DropdownMenuContent>
@@ -137,13 +133,13 @@ export function DataTable<TData, TValue>({
                 {actions.includes("create") && (
                   <DropdownMenuItem className="flex gap-4" onClick={() => callback("create", null)}>
                     <Plus className="w-4 h-4" />
-                    <span>{t("components.dataTable.create_entity")}</span>
+                    <span>Créer</span>
                   </DropdownMenuItem>
                 )}
                 {actions.includes("deleteAll") && (
                   <DropdownMenuItem className="flex gap-4" onClick={() => setOpenModal(true)}>
                     <Trash className="w-4 h-4" />
-                    <span>{t("components.dataTable.delete_entity")}</span>
+                    <span>Supprimer tout</span>
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
@@ -155,7 +151,7 @@ export function DataTable<TData, TValue>({
         <div className="flex justify-center items-center gap-2 md:hidden flex-wrap">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline">{t("components.dataTable.columns")}</Button>
+              <Button variant="outline">Colonnes</Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {table
@@ -189,13 +185,13 @@ export function DataTable<TData, TValue>({
                 {actions.includes("create") && (
                   <DropdownMenuItem className="flex gap-4" onClick={() => callback("create", null)}>
                     <Plus className="w-4 h-4" />
-                    <span>{t("components.dataTable.create_entity")}</span>
+                    <span>Créer</span>
                   </DropdownMenuItem>
                 )}
                 {actions.includes("deleteAll") && (
                   <DropdownMenuItem className="flex gap-4" onClick={() => setOpenModal(true)}>
                     <Trash className="w-4 h-4" />
-                    <span>{t("components.dataTable.delete_entity")}</span>
+                    <span>Supprimer tout</span>
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
@@ -247,7 +243,7 @@ export function DataTable<TData, TValue>({
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  <div className="text-muted-foreground">{t("components.dataTable.no_data")}</div>
+                  <div className="text-muted-foreground">Aucune donnée disponible</div>
                 </TableCell>
               </TableRow>
             )}
@@ -257,9 +253,7 @@ export function DataTable<TData, TValue>({
       <Separator />
       <div className="flex flex-col items-center justify-between gap-4 p-4 md:flex-row">
         <div className="text-sm">
-          {t("components.dataTable.footer.page")} <strong>{table.getState().pagination.pageIndex + 1}</strong>{" "}
-          {t("components.dataTable.footer.of")} <strong>{table.getPageCount()}</strong> • {dataCount}{" "}
-          {t("components.dataTable.footer.total")} {t("components.dataTable.footer.entries")}
+          Page <strong>{table.getState().pagination.pageIndex + 1}</strong> sur <strong>{table.getPageCount()}</strong> • {dataCount} entrées au total
         </div>
         <div className="flex flex-col items-center sm:flex-row sm:items-start gap-4">
           <div className="flex items-center space-x-2 ">
@@ -269,7 +263,7 @@ export function DataTable<TData, TValue>({
               onClick={() => setPagination((prev) => ({ ...prev, pageIndex: 0 }))}
               disabled={pagination.pageIndex === 0}
             >
-              {t("components.dataTable.footer.first")}
+              Première
             </Button>
             <Button
               variant="outline"
@@ -277,7 +271,7 @@ export function DataTable<TData, TValue>({
               onClick={() => setPagination((prev) => ({ ...prev, pageIndex: prev.pageIndex - 1 }))}
               disabled={pagination.pageIndex === 0}
             >
-              {t("components.dataTable.footer.previous")}
+              Précédente
             </Button>
             <Button
               variant="outline"
@@ -285,7 +279,7 @@ export function DataTable<TData, TValue>({
               onClick={() => setPagination((prev) => ({ ...prev, pageIndex: prev.pageIndex + 1 }))}
               disabled={(pagination.pageIndex + 1) * pagination.pageSize >= dataCount}
             >
-              {t("components.dataTable.footer.next")}
+              Suivante
             </Button>
             <Button
               variant="outline"
@@ -298,7 +292,7 @@ export function DataTable<TData, TValue>({
               }
               disabled={(pagination.pageIndex + 1) * pagination.pageSize >= dataCount}
             >
-              {t("components.dataTable.footer.last")}
+              Dernière
             </Button>
           </div>
           <Select
@@ -322,17 +316,17 @@ export function DataTable<TData, TValue>({
             <SelectTrigger className="w-36">
               <SelectValue placeholder="Rows">
                 {table.getState().pagination.pageSize === dataCount
-                  ? `${t("components.dataTable.footer.all")}`
-                  : table.getState().pagination.pageSize + ` ${t("components.dataTable.footer.per_page")}`}
+                  ? "Tout"
+                  : table.getState().pagination.pageSize + " par page"}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {[10, 25, 50].map((size) => (
                 <SelectItem key={size} value={String(size)}>
-                  {size} {t("components.dataTable.footer.per_page")}
+                  {size} par page
                 </SelectItem>
               ))}
-              <SelectItem value="all"> {t("components.dataTable.footer.all")}</SelectItem>
+              <SelectItem value="all">Tout afficher</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -341,12 +335,12 @@ export function DataTable<TData, TValue>({
         <Dialog open={openModal} onOpenChange={setOpenModal}>
           <DialogContent className="sm:max-w-[450px]">
             <DialogHeader>
-              <DialogTitle>{t("components.dataTable.delete_title")}</DialogTitle>
-              <DialogDescription>{t("components.dataTable.delete_description")}</DialogDescription>
+              <DialogTitle>Confirmer la suppression</DialogTitle>
+              <DialogDescription>Êtes-vous sûr de vouloir supprimer tous les éléments ? Cette action est irréversible.</DialogDescription>
             </DialogHeader>
             <DialogFooter>
               <Button variant="outline" onClick={() => setOpenModal(false)}>
-                {t("global.buttons.cancel")}
+                Annuler
               </Button>
               <Button
                 variant="destructive"
@@ -355,7 +349,7 @@ export function DataTable<TData, TValue>({
                   setOpenModal(false);
                 }}
               >
-                {t("global.buttons.delete")}
+                Supprimer
               </Button>
             </DialogFooter>
           </DialogContent>

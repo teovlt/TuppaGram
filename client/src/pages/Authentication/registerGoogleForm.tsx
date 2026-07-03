@@ -1,8 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getRegisterSchema } from "@/lib/zod/schemas/auth/zod";
+import { registerSchema } from "@/lib/zod/schemas/auth/zod";
 import { useAuthContext } from "@/contexts/authContext";
-import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { axiosConfig } from "@/config/axiosConfig";
 import { toast } from "sonner";
@@ -12,7 +11,6 @@ export const RegisterGoogleForm = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { setAuthUser } = useAuthContext();
-  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
   const userData = location.state;
@@ -37,17 +35,16 @@ export const RegisterGoogleForm = () => {
     photoURL: photoURL,
   };
 
-  const registerSchema = getRegisterSchema(t);
   async function register(values: z.infer<typeof registerSchema>) {
     try {
       setLoading(true);
       const response = await axiosConfig.post("/auth/register/", values);
-      toast.success(t(response.data.message));
+      toast.success(response.data.message);
       setAuthUser(response.data.user);
       localStorage.setItem("accessToken", response.data.accessToken);
       navigate("/");
     } catch (error: any) {
-      toast.error(t(error.response.data.error));
+      toast.error(error.response.data.error);
     } finally {
       setLoading(false);
     }

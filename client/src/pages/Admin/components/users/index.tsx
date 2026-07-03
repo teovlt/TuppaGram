@@ -6,7 +6,6 @@ import { Dialog, DialogHeader, DialogContent, DialogTitle } from "@/components/u
 import { UserForm } from "./userForm";
 import { UserInterface } from "@/interfaces/User";
 import { DataTable } from "@/components/customs/dataTable";
-import { useTranslation } from "react-i18next";
 
 export const Users = () => {
   const [users, setUsers] = useState<UserInterface[]>([]);
@@ -16,8 +15,6 @@ export const Users = () => {
   const [selectedUser, setSelectedUser] = useState<UserInterface>();
   const [userCount, setUserCount] = useState(0);
 
-  const { t } = useTranslation();
-
   async function fetchUsers(page: number = 0, size: number = 10) {
     setLoading(true);
     try {
@@ -25,7 +22,7 @@ export const Users = () => {
       setUsers(response.data.users);
       setUserCount(response.data.count);
     } catch (error: any) {
-      toast.error(t(error.response.data.error));
+      toast.error(error.response.data.error);
     } finally {
       setLoading(false);
     }
@@ -52,11 +49,24 @@ export const Users = () => {
     }
   }
 
+  const getActionTitle = (act: string) => {
+    switch (act) {
+      case "create":
+        return "Créer";
+      case "update":
+        return "Modifier";
+      case "delete":
+        return "Supprimer";
+      default:
+        return "";
+    }
+  };
+
   return (
     <div>
       <div className="container px-4 mx-auto">
         <DataTable
-          columns={getColumns(callback, t)}
+          columns={getColumns(callback)}
           data={users}
           dataCount={userCount}
           fetchData={fetchUsers}
@@ -71,7 +81,7 @@ export const Users = () => {
           <DialogContent className="sm:max-w-[625px]">
             <DialogHeader>
               <DialogTitle>
-                {t(`pages.admin.users_page.actions_type.` + action)} {t("pages.admin.users_page.a_user")}
+                {getActionTitle(action)} un utilisateur
               </DialogTitle>
             </DialogHeader>
             <UserForm dialog={setOpenDialog} refresh={fetchUsers} action={action} user={selectedUser} />

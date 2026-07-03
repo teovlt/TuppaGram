@@ -7,13 +7,12 @@ import { toast } from "sonner";
 import { AvatarWithStatusCell } from "../../../../components/customs/avatarStatusCell";
 import { UserInterface } from "@/interfaces/User";
 import { Badge } from "@/components/ui/badge";
-import { TFunction } from "i18next";
 import { UserRoleBadge } from "@/components/customs/userRoleBadge";
 
-export const getColumns = (callback: (action: string, data: any) => void, t: TFunction<"translation">): ColumnDef<UserInterface>[] => [
+export const getColumns = (callback: (action: string, data: any) => void): ColumnDef<UserInterface>[] => [
   {
     accessorKey: "user",
-    header: t("pages.admin.users_page.user"),
+    header: "Utilisateur",
     cell: ({ row }) => {
       const user = row.original;
       return (
@@ -34,7 +33,7 @@ export const getColumns = (callback: (action: string, data: any) => void, t: TFu
     accessorKey: "role",
     header: ({ column }) => (
       <Button variant="ghost" className="font-bold" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-        {t("pages.admin.users_page.role")} <ArrowUpDown className="w-4 h-4 ml-2" />
+        Rôle <ArrowUpDown className="w-4 h-4 ml-2" />
       </Button>
     ),
     cell: ({ row }) => {
@@ -46,7 +45,7 @@ export const getColumns = (callback: (action: string, data: any) => void, t: TFu
     accessorKey: "username",
     header: ({ column }) => (
       <Button variant="ghost" className="font-bold" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-        {t("pages.admin.users_page.username")}
+        Nom d'utilisateur
         <ArrowUpDown className="w-4 h-4 ml-2" />
       </Button>
     ),
@@ -56,7 +55,7 @@ export const getColumns = (callback: (action: string, data: any) => void, t: TFu
     accessorKey: "email",
     header: ({ column }) => (
       <Button variant="ghost" className="font-bold" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-        {t("pages.admin.users_page.email")}
+        Email
         <ArrowUpDown className="w-4 h-4 ml-2" />
       </Button>
     ),
@@ -66,7 +65,7 @@ export const getColumns = (callback: (action: string, data: any) => void, t: TFu
     accessorKey: "auth_type",
     header: ({ column }) => (
       <Button variant="ghost" className="font-bold" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-        {t("pages.admin.users_page.auth_type")}
+        Méthode d'auth.
         <ArrowUpDown className="w-4 h-4 ml-2" />
       </Button>
     ),
@@ -76,7 +75,7 @@ export const getColumns = (callback: (action: string, data: any) => void, t: TFu
     accessorKey: "createdAt",
     header: ({ column }) => (
       <Button variant="ghost" className="font-bold" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-        {t("pages.admin.users_page.joined")}
+        Inscrit le
         <ArrowUpDown className="w-4 h-4 ml-2" />
       </Button>
     ),
@@ -85,12 +84,12 @@ export const getColumns = (callback: (action: string, data: any) => void, t: TFu
       const formatted = format(new Date(value as Date), "dd/MM/yyyy HH:mm");
       return <div>{formatted}</div>;
     },
-    meta: { label: "Joined" },
+    meta: { label: "Inscrit le" },
   },
   {
     id: "actions",
     enableHiding: false,
-    header: t("pages.admin.users_page.actions"),
+    header: "Actions",
     cell: ({ row }) => {
       const user = row.original;
 
@@ -106,17 +105,17 @@ export const getColumns = (callback: (action: string, data: any) => void, t: TFu
               className="flex gap-4"
               onClick={() => {
                 navigator.clipboard.writeText(user._id);
-                toast.success(t("pages.admin.users_page.copy_id_success"));
+                toast.success("ID copié !");
               }}
             >
               <Copy className="w-4 h-4" />
-              {t("pages.admin.users_page.copy_id")}
+              Copier l'ID
             </DropdownMenuItem>
             <DropdownMenuItem className="flex gap-4" onClick={() => callback("update", user._id)}>
-              <Pencil className="w-4 h-4" /> {t("pages.admin.users_page.update_user")}
+              <Pencil className="w-4 h-4" /> Modifier l'utilisateur
             </DropdownMenuItem>
             <DropdownMenuItem className="flex gap-4 text-destructive hover:text-destructive!" onClick={() => callback("delete", user._id)}>
-              <Trash className="w-4 h-4" /> {t("pages.admin.users_page.delete_user")}
+              <Trash className="w-4 h-4" /> Supprimer l'utilisateur
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

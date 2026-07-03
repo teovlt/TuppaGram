@@ -5,16 +5,10 @@ import { axiosConfig } from "@/config/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/contexts/authContext";
 import { toast } from "sonner";
-import { useTranslation } from "react-i18next";
 
-interface OauthProps {
-  message: string;
-}
-
-export function OAuth({ message }: OauthProps) {
+export function OAuth() {
   const navigate = useNavigate();
   const { setAuthUser } = useAuthContext();
-  const { t } = useTranslation();
 
   const auth = getAuth(app);
 
@@ -34,7 +28,7 @@ export function OAuth({ message }: OauthProps) {
       try {
         const res = await axiosConfig.post("/auth/login/google", userData);
         localStorage.setItem("accessToken", res.data.accessToken);
-        toast.success(t(res.data.message));
+        toast.success(res.data.message);
         setAuthUser(res.data.user);
         navigate("/");
       } catch (err: any) {
@@ -42,11 +36,11 @@ export function OAuth({ message }: OauthProps) {
         if (errorMessage === "User not found, lets register !") {
           navigate("/register/google", { state: userData });
         } else {
-          toast.error(t(errorMessage || "auth.error"));
+          toast.error(errorMessage || "Erreur d'authentification");
         }
       }
     } catch (err: any) {
-      toast.error(t("auth.error"));
+      toast.error("Erreur d'authentification");
     }
   };
 
@@ -71,7 +65,7 @@ export function OAuth({ message }: OauthProps) {
           fill="#EA4335"
         />
       </svg>
-      <span className="font-medium">{t(message + "_google")}</span>
+      <span className="font-medium">Se connecter avec Google</span>
     </Button>
   );
 }

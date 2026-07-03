@@ -4,11 +4,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { axiosConfig } from "@/config/axiosConfig";
 import { useAuthContext } from "@/contexts/authContext";
-import { getUpdatePasswordSchema } from "@/lib/zod/schemas/account/zod";
+import { updatePasswordSchema } from "@/lib/zod/schemas/account/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -18,29 +17,22 @@ interface UpdatePasswordProps {
 
 export const UpdatePasswordForm = ({ setOpen }: UpdatePasswordProps) => {
   const { authUser } = useAuthContext();
-  const { t } = useTranslation();
-
   const [loading, setLoading] = useState(false);
 
-  const updatePasswordSchema = getUpdatePasswordSchema(t);
   const updatePasswordForm = useForm<z.infer<typeof updatePasswordSchema>>({
-    resolver: zodResolver(updatePasswordSchema),
-    defaultValues: {
-      currentPassword: "",
-      newPassword: "",
-      newPasswordConfirm: "",
-    },
+    resolver: zodResolver(updatePasswordSchema) as any,
+    defaultValues: { currentPassword: "", newPassword: "", newPasswordConfirm: "" },
   });
 
   const onUpdatePasswordSubmit = async (values: z.infer<typeof updatePasswordSchema>) => {
     try {
       setLoading(true);
       const response = await axiosConfig.put(`/users/${authUser?._id}/password`, values);
-      toast.success(t(response.data.message));
+      toast.success(response.data.message);
       setOpen(false);
       updatePasswordForm.reset();
     } catch (error: any) {
-      toast.error(t(error.response.data.error));
+      toast.error(error.response.data.error);
     } finally {
       setLoading(false);
     }
@@ -51,17 +43,17 @@ export const UpdatePasswordForm = ({ setOpen }: UpdatePasswordProps) => {
       <Form {...updatePasswordForm}>
         <form onSubmit={updatePasswordForm.handleSubmit(onUpdatePasswordSubmit)} className="space-y-6">
           <DialogHeader>
-            <DialogTitle>{t("pages.account.edit_profile_title")}</DialogTitle>
-            <DialogDescription>{t("pages.account.edit_profile_description")}</DialogDescription>
+            <DialogTitle>Modifier le profil</DialogTitle>
+            <DialogDescription>Apportez des modifications à votre mot de passe ici. Cliquez sur enregistrer lorsque vous avez terminé.</DialogDescription>
           </DialogHeader>
           <FormField
             control={updatePasswordForm.control}
             name="currentPassword"
             render={({ field }) => (
               <FormItem className="flex-1">
-                <FormLabel>{t("pages.account.current_password_label")}</FormLabel>
+                <FormLabel>Mot de passe actuel</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder={t("pages.account.password_placeholder")} {...field} />
+                  <Input type="password" placeholder="********" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -72,9 +64,9 @@ export const UpdatePasswordForm = ({ setOpen }: UpdatePasswordProps) => {
             name="newPassword"
             render={({ field }) => (
               <FormItem className="flex-1">
-                <FormLabel>{t("pages.account.new_password_label")}</FormLabel>
+                <FormLabel>Nouveau mot de passe</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder={t("pages.account.password_placeholder")} {...field} />
+                  <Input type="password" placeholder="********" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -85,9 +77,9 @@ export const UpdatePasswordForm = ({ setOpen }: UpdatePasswordProps) => {
             name="newPasswordConfirm"
             render={({ field }) => (
               <FormItem className="flex-1">
-                <FormLabel>{t("pages.account.new_password_confirm_label")}</FormLabel>
+                <FormLabel>Confirmation du nouveau mot de passe</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder={t("pages.account.password_placeholder")} {...field} />
+                  <Input type="password" placeholder="********" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -96,10 +88,10 @@ export const UpdatePasswordForm = ({ setOpen }: UpdatePasswordProps) => {
 
           <DialogFooter>
             <Button disabled={loading} type="submit">
-              {t("global.buttons.save")}
+              Enregistrer
             </Button>
             <Button variant="outline" onClick={() => setOpen(false)} type="button">
-              {t("global.buttons.cancel")}
+              Annuler
             </Button>
           </DialogFooter>
         </form>

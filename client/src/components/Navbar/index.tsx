@@ -1,7 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
 import { ThemeChanger } from "./themeChanger";
-import { LanguageChanger } from "./languageChanger";
-import { useTranslation } from "react-i18next";
 import { Separator } from "../ui/separator";
 import { Home, House, LogOut, Menu, User, Wrench, X } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
@@ -26,7 +24,6 @@ export const Navbar = () => {
   const menuRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
-  const { t } = useTranslation();
   const { logout, loading } = useLogout();
   const { authUser } = useAuthContext();
 
@@ -46,44 +43,15 @@ export const Navbar = () => {
   };
 
   const navLinks = [
-    {
-      label: t("navbar.home"),
-      path: "/",
-      icon: Home,
-      auth: true,
-    },
-    {
-      label: t("navbar.account"),
-      path: "/account",
-      icon: User,
-      auth: true,
-    },
-    {
-      label: t("navbar.dashboard"),
-      path: "/admin/dashboard",
-      icon: Wrench,
-      auth: authUser?.role === "admin",
-    },
+    { label: "Accueil", path: "/", icon: Home, auth: true },
+    { label: "Mon compte", path: "/account", icon: User, auth: true },
+    { label: "Tableau de bord", path: "/admin/dashboard", icon: Wrench, auth: authUser?.role === "admin" },
   ];
 
   const mobileLinks = [
-    {
-      label: t("navbar.home"),
-      path: "/",
-      icon: House,
-    },
-    {
-      label: t("navbar.account"),
-      path: "/account",
-      icon: User,
-      auth: !!authUser,
-    },
-    {
-      label: t("navbar.dashboard"),
-      path: "/admin/dashboard",
-      icon: Wrench,
-      auth: authUser?.role === "admin",
-    },
+    { label: "Accueil", path: "/", icon: House },
+    { label: "Mon compte", path: "/account", icon: User, auth: !!authUser },
+    { label: "Tableau de bord", path: "/admin/dashboard", icon: Wrench, auth: authUser?.role === "admin" },
   ];
 
   return (
@@ -136,7 +104,7 @@ export const Navbar = () => {
                       <DropdownMenuSeparator />
                       <DropdownMenuGroup>
                         <DropdownMenuItem className="hover:cursor-pointer" onClick={() => logout()} disabled={loading}>
-                          {t("navbar.logout")}
+                          Se déconnecter
                           <DropdownMenuShortcut>
                             <LogOut className="w-4 h-4" />
                           </DropdownMenuShortcut>
@@ -147,13 +115,12 @@ export const Navbar = () => {
                 </>
               ) : (
                 <Button onClick={() => navigate("/login")} variant="link">
-                  {t("navbar.login")}
+                  Se connecter
                 </Button>
               )}
             </div>
             <Separator orientation="vertical" className="h-8" />
             <div className="flex items-center justify-between gap-4">
-              <LanguageChanger />
               <ThemeChanger />
             </div>
           </div>
@@ -196,13 +163,12 @@ export const Navbar = () => {
                 <Separator />
                 <Button onClick={() => logout()} variant="link" disabled={loading} className="flex items-center justify-start gap-4">
                   <LogOut className="w-4 h-4" />
-                  {t("navbar.logout")}
+                  Se déconnecter
                 </Button>
               </>
             )}
             <Separator />
             <div className="flex items-center justify-center gap-4">
-              <LanguageChanger />
               <ThemeChanger />
             </div>
           </div>

@@ -1,42 +1,40 @@
 import { z } from "zod";
 
-export const getLoginSchema = (t: (key: string) => string) =>
-  z.object({
-    loginName: z
+export const loginSchema = z.object({
+  loginName: z
+    .string()
+    .min(2, { message: "Le nom d'utilisateur ou email doit comporter au moins 2 caractères" })
+    .regex(/^[^A-Z\s]+$/, { message: "Le nom d'utilisateur ou l'email ne doit pas contenir d'espaces ni de lettres majuscules." }),
+  password: z
+    .string()
+    .min(1, { message: "Le mot de passe doit comporter au moins 6 caractères" })
+    .max(255, { message: "Le mot de passe doit comporter au plus 255 caractères" }),
+});
+
+export const registerSchema = z
+  .object({
+    name: z
       .string()
-      .min(2, { message: t("pages.login.errors.login_name_min") })
-      .regex(/^[^A-Z\s]+$/, { message: t("pages.login.errors.login_name_no_spaces") }),
+      .min(2, { message: "Le nom doit comporter au moins 2 caractères." })
+      .max(25, { message: "Le nom doit comporter au maximum 25 caractères." }),
+    forename: z
+      .string()
+      .min(2, { message: "Le prénom doit comporter au moins 2 caractères." })
+      .max(25, { message: "Le prénom doit comporter au maximum 25 caractères." }),
+    username: z
+      .string()
+      .min(2, { message: "Le nom d'utilisateur doit comporter au moins 2 caractères." })
+      .max(25, { message: "Le nom d'utilisateur doit comporter au maximum 25 caractères." })
+      .regex(/^[^A-Z\s]+$/, { message: "Le nom d'utilisateur ne doit pas contenir d'espaces ni de lettres majuscules." }),
+    email: z.string().email({ message: "Veuillez entrer une adresse email valide." }),
     password: z
       .string()
-      .min(1, { message: t("pages.login.errors.password_min") })
-      .max(255, { message: t("pages.login.errors.password_max") }),
+      .max(255, { message: "Le mot de passe doit comporter au maximum 255 caractères." })
+      .min(1, { message: "Le mot de passe doit contenir au moins 8 caractères, une lettre minuscule, une lettre majuscule, un chiffre et un caractère spécial." }),
+    confirmPassword: z.string(),
+    photoURL: z.string().optional(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Les mots de passe ne correspondent pas.",
+    path: ["confirmPassword"],
   });
-
-export const getRegisterSchema = (t: (key: string) => string) =>
-  z
-    .object({
-      name: z
-        .string()
-        .min(2, { message: t("pages.register.errors.name_min") })
-        .max(25, { message: t("pages.register.errors.name_max") }),
-      forename: z
-        .string()
-        .min(2, { message: t("pages.register.errors.forename_min") })
-        .max(25, { message: t("pages.register.errors.forename_max") }),
-      username: z
-        .string()
-        .min(2, { message: t("pages.register.errors.username_min") })
-        .max(25, { message: t("pages.register.errors.username_max") })
-        .regex(/^[^A-Z\s]+$/, { message: t("pages.register.errors.username_no_spaces") }),
-      email: z.string().email({ message: t("pages.register.errors.invalid_email") }),
-      password: z
-        .string()
-        .max(255, { message: t("pages.register.errors.password_max") })
-        .min(1, { message: t("pages.register.errors.password_invalid") }),
-      confirmPassword: z.string(),
-      photoURL: z.string().optional(),
-    })
-    .refine((data) => data.password === data.confirmPassword, {
-      message: t("pages.register.errors.passwords_mismatch"),
-      path: ["confirmPassword"],
-    });

@@ -6,28 +6,13 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, useSidebar } fro
 import { useAuthContext } from "@/contexts/authContext";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { LanguageChanger } from "@/components/Navbar/languageChanger";
 import { ThemeChanger } from "@/components/Navbar/themeChanger";
-import { useTranslation } from "react-i18next";
 
 const adminMenus = {
   navMain: [
-    {
-      title: "dashboard",
-      icon: Presentation,
-      url: "/admin/dashboard",
-      isActive: true,
-    },
-    {
-      title: "users",
-      icon: UsersIcon,
-      url: "/admin/users",
-    },
-    {
-      title: "logs",
-      icon: NotebookText,
-      url: "/admin/logs",
-    },
+    { title: "Tableau de bord", icon: Presentation, url: "/admin/dashboard", isActive: true },
+    { title: "Utilisateurs", icon: UsersIcon, url: "/admin/users" },
+    { title: "Journaux", icon: NotebookText, url: "/admin/logs" },
   ],
 };
 
@@ -35,14 +20,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { authUser } = useAuthContext();
   const navigate = useNavigate();
   const { state } = useSidebar();
-  const { t } = useTranslation();
 
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader onClick={() => navigate("/")}>
         <Button variant="outline" className="p-4">
           <Home className="w-6 h-6" />
-          {state === "expanded" ? <span>{t("pages.admin.back_to_app")}</span> : null}
+          {state === "expanded" ? <span>Retour à l'accueil</span> : null}
         </Button>
       </SidebarHeader>
       <SidebarContent>
@@ -50,7 +34,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
       <SidebarFooter>
         <ThemeChanger />
-        <LanguageChanger />
         <NavUser user={authUser} />
       </SidebarFooter>
     </Sidebar>

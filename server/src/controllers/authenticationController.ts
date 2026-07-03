@@ -17,30 +17,30 @@ export const register = async (req: Request, res: Response): Promise<void> => {
   const { name, forename, email, username, photoURL, password, confirmPassword } = req.body;
 
   if (!username || !email || !password || !confirmPassword || !name || !forename) {
-    res.status(422).json({ error: "server.global.errors.missing_fields" });
+    res.status(422).json({ error: "Champs requis manquants" });
     return;
   }
 
   if (!Constants.REGEX_PASSWORD.test(password)) {
-    res.status(400).json({ error: "server.auth.errors.regex" });
+    res.status(400).json({ error: "Le nom d'utilisateur contient des caractères non autorisés" });
     return;
   }
 
   if (password !== confirmPassword) {
-    res.status(400).json({ error: "server.auth.errors.password_no_match" });
+    res.status(400).json({ error: "Les mots de passe ne correspondent pas" });
     return;
   }
 
   try {
     const existingEmailUser = await User.findOne({ email: email.toLowerCase() });
     if (existingEmailUser) {
-      res.status(409).json({ error: "server.auth.errors.email_taken" });
+      res.status(409).json({ error: "Cet email est déjà utilisé" });
       return;
     }
 
     const existingUsernameUser = await User.findOne({ username: username.toLowerCase() });
     if (existingUsernameUser) {
-      res.status(409).json({ error: "server.auth.errors.username_taken" });
+      res.status(409).json({ error: "Ce nom d'utilisateur est déjà pris" });
       return;
     }
 
@@ -87,7 +87,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     const { password: _password, ...userWithoutPassword } = user.toObject();
 
-    res.status(201).json({ user: userWithoutPassword, message: "server.auth.messages.register_success", accessToken });
+    res.status(201).json({ user: userWithoutPassword, message: "Inscription réussie", accessToken });
     return;
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -102,7 +102,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   const { username, password, email } = req.body;
 
   if (!password || (!username && !email)) {
-    res.status(422).json({ error: "server.global.errors.missing_fields" });
+    res.status(422).json({ error: "Champs requis manquants" });
     return;
   }
 
@@ -112,7 +112,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }).select("+password");
 
     if (!user) {
-      res.status(400).json({ error: "server.global.errors.no_such_user" });
+      res.status(400).json({ error: "Aucun utilisateur trouvé" });
       return;
     }
 
@@ -123,7 +123,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         userId: user._id,
         level: logLevels.ERROR,
       });
-      res.status(400).json({ error: "server.auth.errors.invalid_credentials" });
+      res.status(400).json({ error: "Identifiants invalides" });
       return;
     }
 
@@ -131,7 +131,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     const { password: _password, ...userWithoutPassword } = user.toObject();
 
-    res.status(201).json({ user: userWithoutPassword, message: "server.auth.messages.login_success", accessToken });
+    res.status(201).json({ user: userWithoutPassword, message: "Connexion réussie", accessToken });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -141,7 +141,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
  * Logs out a user by clearing the access token cookie.
  */
 export const logout = async (req: Request, res: Response): Promise<void> => {
-  res.status(200).json({ message: "server.auth.messages.logout_success" });
+  res.status(200).json({ message: "Déconnexion réussie" });
 };
 
 /**
@@ -165,20 +165,20 @@ export const signInWithGoogle = async (req: Request, res: Response): Promise<voi
   const { email } = req.body;
 
   if (!email) {
-    res.status(422).json({ error: "server.global.errors.missing_fields" });
+    res.status(422).json({ error: "Champs requis manquants" });
     return;
   }
 
   try {
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
-      res.status(404).json({ error: "User not found, lets register !" });
+      res.status(404).json({ error: "Utilisateur introuvable, veuillez vous inscrire !" });
       return;
     }
 
     const accessToken = generateAccessToken(user._id);
 
-    res.status(201).json({ user, message: "server.auth.messages.login_success", accessToken });
+    res.status(201).json({ user, message: "Connexion réussie", accessToken });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

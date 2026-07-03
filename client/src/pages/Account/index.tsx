@@ -7,7 +7,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
-import { getUpdateAccountSchema } from "@/lib/zod/schemas/account/zod";
+import { updateAccountSchema } from "@/lib/zod/schemas/account/zod";
 import { useState } from "react";
 import { toast } from "sonner";
 import { axiosConfig } from "@/config/axiosConfig";
@@ -25,19 +25,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DeleteAccountForm } from "./components/deleteAccountForm";
-import { useTranslation } from "react-i18next";
 
 export const Account = () => {
   const { authUser, setAuthUser, loading } = useAuthContext();
-  const { t } = useTranslation();
 
   const [updateLoading, setUpdateLoading] = useState(false);
   const [openUpdatePasswordDialog, setOpenUpdatePasswordDialog] = useState(false);
   const [openDeleteAccountDialog, setOpenDeleteAccountDialog] = useState(false);
 
-  const updateAccountSchema = getUpdateAccountSchema(t);
   const updateForm = useForm<z.infer<typeof updateAccountSchema>>({
-    resolver: zodResolver(updateAccountSchema),
+    resolver: zodResolver(updateAccountSchema) as any,
     defaultValues: {
       name: authUser?.name,
       forename: authUser?.forename,
@@ -50,10 +47,10 @@ export const Account = () => {
     try {
       setUpdateLoading(true);
       const response = await axiosConfig.put(`/users/${authUser?._id}`, values);
-      toast.success(t(response.data.message));
+      toast.success(response.data.message);
       setAuthUser(response.data.user);
     } catch (error: any) {
-      toast.error(t(error.response.data.error));
+      toast.error(error.response.data.error);
     } finally {
       setUpdateLoading(false);
     }
@@ -65,13 +62,13 @@ export const Account = () => {
     const file = e.target.files?.[0];
 
     if (!file?.type.includes("image")) {
-      toast.error(t("pages.account.errors.invalid_file_type"));
+      toast.error("Type de fichier invalide");
       setUpdateLoading(false);
       return;
     }
 
     if (!file) {
-      toast.error(t("pages.account.errors.no_file_selected"));
+      toast.error("Aucun fichier sélectionné");
       setUpdateLoading(false);
       return;
     }
@@ -84,10 +81,10 @@ export const Account = () => {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      toast.success(t(response.data.message));
+      toast.success(response.data.message);
       setAuthUser(response.data.user);
     } catch (error: any) {
-      toast.error(t(error.response?.data?.error));
+      toast.error(error.response?.data?.error);
     } finally {
       setUpdateLoading(false);
     }
@@ -100,8 +97,8 @@ export const Account = () => {
       <Card className="w-full max-w-4xl p-4 shadow-xl rounded-2xl">
         <CardHeader className="flex flex-row items-center justify-between ">
           <div>
-            <CardTitle>{t("pages.account.account_settings_title")}</CardTitle>
-            <CardDescription>{t("pages.account.account_settings_description")}</CardDescription>
+            <CardTitle>Paramètres du compte</CardTitle>
+            <CardDescription>Mettez à jour vos informations personnelles et les détails de votre compte.</CardDescription>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild className="cursor-pointer">
@@ -110,11 +107,11 @@ export const Account = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-auto">
-              <DropdownMenuLabel>{t("pages.account.actions")}</DropdownMenuLabel>
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="cursor-pointer" onClick={() => setOpenDeleteAccountDialog(true)}>
                 <Trash className="w-4 h-4 text-destructive" />
-                <span className="text-destructive ">{t("pages.account.delete_account")}</span>
+                <span className="text-destructive ">Supprimer le compte</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -127,7 +124,7 @@ export const Account = () => {
               </Avatar>
             </div>
             <div>
-              <InputFile buttonText={t("choose_image")} id="profile-picture" disabled={loading} onChange={updateProfilePic} />
+              <InputFile buttonText="Choisir une image" id="profile-picture" disabled={loading} onChange={updateProfilePic} />
             </div>
           </div>
           <Form {...updateForm}>
@@ -138,7 +135,7 @@ export const Account = () => {
                   name="forename"
                   render={({ field }) => (
                     <FormItem className="flex-1">
-                      <FormLabel>{t("pages.account.forename_label")}</FormLabel>
+                      <FormLabel>Prénom</FormLabel>
                       <FormControl>
                         <Input placeholder="John" {...field} />
                       </FormControl>
@@ -151,7 +148,7 @@ export const Account = () => {
                   name="name"
                   render={({ field }) => (
                     <FormItem className="flex-1">
-                      <FormLabel>{t("pages.account.name_label")}</FormLabel>
+                      <FormLabel>Nom</FormLabel>
                       <FormControl>
                         <Input placeholder="Doe" {...field} />
                       </FormControl>
@@ -165,7 +162,7 @@ export const Account = () => {
                 name="username"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("pages.account.username_label")}</FormLabel>
+                    <FormLabel>Nom d'utilisateur</FormLabel>
                     <FormControl>
                       <Input placeholder="john_doe" {...field} />
                     </FormControl>
@@ -178,7 +175,7 @@ export const Account = () => {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("pages.account.email_label")}</FormLabel>
+                    <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input placeholder="john.doe@gmail.com" {...field} />
                     </FormControl>
@@ -189,13 +186,13 @@ export const Account = () => {
 
               <FormItem>
                 <div className="flex flex-col w-full gap-2">
-                  <FormLabel>{t("pages.account.password_label")}</FormLabel>
+                  <FormLabel>Mot de passe</FormLabel>
                   <div className="flex items-center justify-between gap-4">
                     <FormControl>
-                      <Input type="password" placeholder={t("pages.account.password_placeholder")} disabled />
+                      <Input type="password" placeholder="********" disabled />
                     </FormControl>
                     <Button type="button" variant="outline" onClick={() => setOpenUpdatePasswordDialog(true)} disabled={updateLoading}>
-                      {t("pages.account.change_password")}
+                      Changer le mot de passe
                     </Button>
                   </div>
                 </div>
@@ -203,7 +200,7 @@ export const Account = () => {
 
               <CardFooter className="px-0">
                 <Button type="submit" disabled={updateLoading} className="w-full">
-                  {t("global.buttons.update")}
+                  Mettre à jour
                 </Button>
               </CardFooter>
             </form>

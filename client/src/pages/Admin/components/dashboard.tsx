@@ -4,7 +4,6 @@ import { axiosConfig } from "@/config/axiosConfig";
 import { useSocketContext } from "@/contexts/socketContext";
 import { Activity, LogIn, Users } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 export const Dashboard = () => {
@@ -12,7 +11,6 @@ export const Dashboard = () => {
   const [userCount, setUserCount] = useState(0);
   const [authTypes, setAuthType] = useState<{ label: string; value: number }[]>();
   const { onlineUsers } = useSocketContext();
-  const { t } = useTranslation();
 
   useEffect(() => {
     fetchUsers();
@@ -25,7 +23,7 @@ export const Dashboard = () => {
       const response = await axiosConfig.get("/users");
       setUserCount(response.data.count);
     } catch (error: any) {
-      toast.error(t(error.response.data.error));
+      toast.error(error.response.data.error);
     } finally {
       setLoading(false);
     }
@@ -37,7 +35,7 @@ export const Dashboard = () => {
       const response = await axiosConfig.get("/users/stats/authTypes");
       setAuthType(response.data.data);
     } catch (error: any) {
-      toast.error(t(error.response.data.error));
+      toast.error(error.response.data.error);
     } finally {
       setLoading(false);
     }
@@ -52,7 +50,7 @@ export const Dashboard = () => {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
             <Card className="max-h-[120px]">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">{t("pages.admin.dashboard_page.active_users")}</CardTitle>
+                <CardTitle className="text-sm font-medium">Utilisateurs actifs</CardTitle>
                 <Activity className="w-4 h-4 text-accent" />
               </CardHeader>
               <CardContent>
@@ -62,7 +60,7 @@ export const Dashboard = () => {
 
             <Card className="max-h-[120px]">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">{t("pages.admin.dashboard_page.total_users")}</CardTitle>
+                <CardTitle className="text-sm font-medium">Utilisateurs totaux</CardTitle>
                 <Users className="w-4 h-4 text-accent" />
               </CardHeader>
               <CardContent>
@@ -72,10 +70,10 @@ export const Dashboard = () => {
             <Card>
               <CardHeader>
                 <div className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle>{t("pages.admin.dashboard_page.auth_methods")}</CardTitle>
+                  <CardTitle>Méthodes d'authentification</CardTitle>
                   <LogIn className="w-4 h-4 text-accent" />
                 </div>
-                <CardDescription>{t("pages.admin.dashboard_page.auth_methods_description")}</CardDescription>
+                <CardDescription>Cette section indique le nombre d'utilisateurs inscrits par méthode d'authentification.</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -92,7 +90,7 @@ export const Dashboard = () => {
                             <div>
                               <p className="font-medium">{item.label}</p>
                               <p className="text-sm text-muted-foreground">
-                                {Math.round((item.value / userCount) * 100)}% {t("pages.admin.dashboard_page.of_users")}
+                                {Math.round((item.value / userCount) * 100)}% des utilisateurs
                               </p>
                             </div>
                           </div>

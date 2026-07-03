@@ -60,10 +60,10 @@ export const deleteLog = async (req: Request, res: Response): Promise<void> => {
   try {
     const log = await Log.findByIdAndDelete(id);
     if (!log) {
-      res.status(400).json({ error: "server.admin.errors.log_not_found" });
+      res.status(400).json({ error: "Journal introuvable" });
       return;
     }
-    res.status(200).json({ message: "server.admin.messages.log_deleted" });
+    res.status(200).json({ message: "Journal supprimé" });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -77,7 +77,7 @@ export const deleteLog = async (req: Request, res: Response): Promise<void> => {
 export const deleteAllLogs = async (req: Request, res: Response): Promise<void> => {
   try {
     await Log.deleteMany();
-    res.status(200).json({ message: "server.admin.messages.logs_cleared" });
+    res.status(200).json({ message: "Journaux effacés" });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

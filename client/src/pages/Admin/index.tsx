@@ -4,10 +4,15 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { Separator } from "@radix-ui/react-separator";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import React from "react";
-import { useTranslation } from "react-i18next";
+
+const segmentLabels: Record<string, string> = {
+  admin: "Admin",
+  dashboard: "Tableau de bord",
+  users: "Utilisateurs",
+  logs: "Journaux",
+};
 
 export const Index = () => {
-  const { t } = useTranslation();
   const location = useLocation();
   const pathSegments = location.pathname.split("/").filter(Boolean);
 
@@ -23,22 +28,23 @@ export const Index = () => {
               <BreadcrumbList>
                 <BreadcrumbItem>
                   <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
-                    {t("pages.admin.home")}
+                    Accueil
                   </Link>
                 </BreadcrumbItem>
                 {pathSegments.map((segment, index) => {
                   const href = "/" + pathSegments.slice(0, index + 1).join("/");
                   const isLast = index === pathSegments.length - 1;
+                  const label = segmentLabels[segment] || segment;
 
                   return (
                     <React.Fragment key={href}>
                       <BreadcrumbSeparator />
                       <BreadcrumbItem>
                         {isLast ? (
-                          <BreadcrumbPage> {t(`pages.admin.${segment}`)}</BreadcrumbPage>
+                          <BreadcrumbPage> {label}</BreadcrumbPage>
                         ) : (
                           <Link to={href} className="text-sm text-muted-foreground hover:text-foreground">
-                            {t(`pages.admin.${segment}`)}
+                            {label}
                           </Link>
                         )}
                       </BreadcrumbItem>

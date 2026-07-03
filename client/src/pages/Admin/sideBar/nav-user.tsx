@@ -16,7 +16,6 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { UserInterface } from "@/interfaces/User";
 import { useEffect, useRef } from "react";
-import { useTranslation } from "react-i18next";
 
 export function NavUser({ user }: { user: UserInterface | null }) {
   if (!user) return null;
@@ -25,7 +24,6 @@ export function NavUser({ user }: { user: UserInterface | null }) {
   const { isMobile } = useSidebar();
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLLIElement | null>(null);
-  const { t } = useTranslation();
 
   const handleClickOutside = (event: any) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -80,19 +78,19 @@ export function NavUser({ user }: { user: UserInterface | null }) {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem className="flex items-center gap-2 hover:cursor-pointer" onClick={() => navigate("/")}>
-                {t("navbar.home")}
+                Accueil
                 <DropdownMenuShortcut>
                   <House className="w-4 h-4" />
                 </DropdownMenuShortcut>
               </DropdownMenuItem>
               <DropdownMenuItem className="flex items-center gap-2 hover:cursor-pointer" onClick={() => navigate("/account")}>
-                {t("navbar.account")}
+                Mon compte
                 <DropdownMenuShortcut>
                   <User className="w-4 h-4" />
                 </DropdownMenuShortcut>
               </DropdownMenuItem>
               <DropdownMenuItem className="flex items-center gap-2 hover:cursor-pointer" onClick={() => navigate("/admin/dashboard")}>
-                {t("navbar.dashboard")}
+                Tableau de bord
                 <DropdownMenuShortcut>
                   <Wrench className="w-4 h-4" />
                 </DropdownMenuShortcut>
@@ -101,7 +99,7 @@ export function NavUser({ user }: { user: UserInterface | null }) {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem className="hover:cursor-pointer" onClick={() => logout()} disabled={loading}>
-                {t("navbar.logout")}
+                Se déconnecter
                 <DropdownMenuShortcut>
                   <LogOut className="w-4 h-4" />
                 </DropdownMenuShortcut>

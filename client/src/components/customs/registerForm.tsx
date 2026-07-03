@@ -1,10 +1,9 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { getRegisterSchema } from "@/lib/zod/schemas/auth/zod";
+import { registerSchema } from "@/lib/zod/schemas/auth/zod";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { OAuth } from "./oauth";
 import { Link } from "react-router-dom";
@@ -26,11 +25,8 @@ export const RegisterForm = ({
   loading = false,
   oauth = false,
 }: RegisterFormProps) => {
-  const { t } = useTranslation();
-  const registerSchema = getRegisterSchema(t);
-
   const form = useForm<z.infer<typeof registerSchema>>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(registerSchema) as any,
     defaultValues: {
       name: "",
       forename: "",
@@ -47,22 +43,25 @@ export const RegisterForm = ({
       <div className="flex items-center self-center gap-2 text-2xl font-medium sm:text-4xl text-accent">Tuppagram</div>
       <div className="flex flex-col w-full max-w-2xl gap-6 bg-background p-4 md:p-8 sm:rounded-2xl sm:shadow">
         <div className="text-center">
-          <h1 className="text-xl md:text-2xl">{oauth ? t("pages.register.title") : t("pages.register.password_creation")}</h1>
+          <h1 className="text-xl md:text-2xl">{oauth ? "Créer un compte" : "Créer un mot de passe"}</h1>
         </div>
         <div className="flex flex-col items-center gap-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-4">
               <div className="flex flex-col gap-4 md:flex-row md:items-center">
-                {["forename", "name"].map((fieldName) => (
+                {[
+                  { name: "forename", label: "Prénom" },
+                  { name: "name", label: "Nom" },
+                ].map((field) => (
                   <FormField
-                    key={fieldName}
+                    key={field.name}
                     control={form.control}
-                    name={fieldName as any}
-                    render={({ field }) => (
+                    name={field.name as any}
+                    render={({ field: f }) => (
                       <FormItem className="w-full">
-                        <FormLabel>{t(`pages.register.${fieldName}`)}</FormLabel>
+                        <FormLabel>{field.label}</FormLabel>
                         <FormControl>
-                          <Input {...field} disabled={disabledFields.includes(fieldName)} />
+                          <Input {...f} disabled={disabledFields.includes(field.name)} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -71,37 +70,42 @@ export const RegisterForm = ({
                 ))}
               </div>
 
-              {["username", "email"].map((fieldName) => (
+              {[
+                { name: "username", label: "Nom d'utilisateur", desc: "Entrez votre nom d'utilisateur" },
+                { name: "email", label: "Email", desc: "Entrez votre email" },
+              ].map((field) => (
                 <FormField
-                  key={fieldName}
+                  key={field.name}
                   control={form.control}
-                  name={fieldName as any}
-                  render={({ field }) => (
+                  name={field.name as any}
+                  render={({ field: f }) => (
                     <FormItem>
-                      <FormLabel>{t(`pages.register.${fieldName}`)}</FormLabel>
+                      <FormLabel>{field.label}</FormLabel>
                       <FormControl>
-                        <Input {...field} disabled={disabledFields.includes(fieldName)} />
+                        <Input {...f} disabled={disabledFields.includes(field.name)} />
                       </FormControl>
-                      {fieldName === "username" && <FormDescription>{t("pages.register.username_description")}</FormDescription>}
-                      {fieldName === "email" && <FormDescription>{t("pages.register.email_description")}</FormDescription>}
+                      <FormDescription>{field.desc}</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               ))}
 
-              {["password", "confirmPassword"].map((fieldName) => (
+              {[
+                { name: "password", label: "Mot de passe", desc: "Entrez votre mot de passe" },
+                { name: "confirmPassword", label: "Confirmer le mot de passe", desc: "Entrez à nouveau votre mot de passe pour vérification" },
+              ].map((field) => (
                 <FormField
-                  key={fieldName}
+                  key={field.name}
                   control={form.control}
-                  name={fieldName as any}
-                  render={({ field }) => (
+                  name={field.name as any}
+                  render={({ field: f }) => (
                     <FormItem>
-                      <FormLabel>{t(`pages.register.${fieldName}`)}</FormLabel>
+                      <FormLabel>{field.label}</FormLabel>
                       <FormControl>
-                        <Input type="password" {...field} disabled={disabledFields.includes(fieldName)} />
+                        <Input type="password" {...f} disabled={disabledFields.includes(field.name)} />
                       </FormControl>
-                      <FormDescription>{t(`pages.register.${fieldName}_description`)}</FormDescription>
+                      <FormDescription>{field.desc}</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -109,24 +113,24 @@ export const RegisterForm = ({
               ))}
 
               <Button type="submit" className="w-full" disabled={loading}>
-                {submitLabel || t("pages.register.register")}
+                {submitLabel || "S'inscrire"}
               </Button>
 
               {import.meta.env.VITE_FIREBASE_API_KEY && oauth && (
                 <>
                   <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
-                    <span className="relative z-10 bg-background px-2 text-muted-foreground">{t("pages.login.or_continue_with")}</span>
+                    <span className="relative z-10 bg-background px-2 text-muted-foreground">Ou continuer avec</span>
                   </div>
-                  <OAuth message="pages.register.register" />
+                  <OAuth />
                 </>
               )}
             </form>
           </Form>
           {oauth && (
             <div className="text-center text-sm md:text-base">
-              {t("pages.register.already_have_account")}{" "}
+              Vous avez déjà un compte ?{" "}
               <Link to="/login" className="underline underline-offset-4 text-accent">
-                {t("pages.register.login")}
+                Connexion
               </Link>
             </div>
           )}

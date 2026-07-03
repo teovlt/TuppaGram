@@ -6,7 +6,6 @@ import { Toaster } from "./components/ui/sonner.js";
 import { AuthContextProvider } from "./contexts/authContext.js";
 import { ThemeProvider } from "./providers/theme-provider.js";
 import { SocketContextProvider } from "./contexts/socketContext.js";
-import "./lib/i18n.js";
 
 if (!import.meta.env.VITE_API_URL) {
   throw new Error("VITE_API_URL is not defined in the environment file");

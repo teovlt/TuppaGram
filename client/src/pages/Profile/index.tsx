@@ -11,6 +11,7 @@ import { Link } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Star } from "lucide-react";
 import { toast } from "sonner";
+import { Account } from "@/pages/Account";
 
 export const Profile = () => {
   const { id } = useParams<{ id: string }>();
@@ -93,11 +94,6 @@ export const Profile = () => {
                 {isFollowing ? "Se désabonner" : "S'abonner"}
               </Button>
             )}
-            {isOwnProfile && (
-              <Link to="/account">
-                <Button variant="outline">Modifier le profil</Button>
-              </Link>
-            )}
           </div>
 
           <div className="flex gap-6 text-sm">
@@ -121,9 +117,10 @@ export const Profile = () => {
 
       {/* Tabs for Posts and Recipes */}
       <Tabs defaultValue="posts" className="w-full mt-8">
-        <TabsList className="grid w-full grid-cols-2 mb-8">
+        <TabsList className={`grid w-full mb-8 ${isOwnProfile ? "grid-cols-3" : "grid-cols-2"}`}>
           <TabsTrigger value="posts">Publications</TabsTrigger>
           <TabsTrigger value="recipes">Recettes</TabsTrigger>
+          {isOwnProfile && <TabsTrigger value="settings">Paramètres</TabsTrigger>}
         </TabsList>
         
         <TabsContent value="posts">
@@ -172,6 +169,14 @@ export const Profile = () => {
             )}
           </div>
         </TabsContent>
+
+        {isOwnProfile && (
+          <TabsContent value="settings">
+            <div className="w-full">
+              <Account />
+            </div>
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );

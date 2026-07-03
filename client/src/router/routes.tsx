@@ -1,7 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { LayoutWrapper } from "./layoutWrapper";
-
-import { Account } from "@/pages/Account";
 import { ProtectedRoute } from "@/router/protectedRoute";
 import { Home } from "@/pages/Home";
 import { RecipesIndex } from "@/pages/Recipes/index";
@@ -69,14 +67,6 @@ export const Router = () => {
           element={
             <ProtectedRoute authRequired={true}>
               <Home />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/account"
-          element={
-            <ProtectedRoute authRequired={true}>
-              <Account />
             </ProtectedRoute>
           }
         />

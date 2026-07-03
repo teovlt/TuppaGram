@@ -47,7 +47,7 @@ export const Navbar = () => {
     { label: "Accueil", path: "/", icon: Home, auth: true },
     { label: "Recettes", path: "/recipes", icon: Utensils, auth: true },
     { label: "Créer", path: "/create", icon: PlusSquare, auth: true },
-    { label: "Mon compte", path: "/account", icon: User, auth: true },
+    { label: "Mon profil", path: `/user/${authUser?._id}`, icon: User, auth: true },
     { label: "Tableau de bord", path: "/admin/dashboard", icon: Wrench, auth: authUser?.role === "admin" },
   ];
 
@@ -55,7 +55,7 @@ export const Navbar = () => {
     { label: "Accueil", path: "/", icon: House },
     { label: "Recettes", path: "/recipes", icon: Utensils, auth: !!authUser },
     { label: "Créer", path: "/create", icon: PlusSquare, auth: !!authUser },
-    { label: "Mon compte", path: "/account", icon: User, auth: !!authUser },
+    { label: "Mon profil", path: `/user/${authUser?._id}`, icon: User, auth: !!authUser },
     { label: "Tableau de bord", path: "/admin/dashboard", icon: Wrench, auth: authUser?.role === "admin" },
   ];
 

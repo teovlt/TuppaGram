@@ -119,7 +119,7 @@ export const getUserRecipes = async (req: Request, res: Response): Promise<void>
   try {
     const { userId } = req.params;
     // If requesting own profile, can see private recipes, otherwise only public
-    const isOwnProfile = req.userId.toString() === userId;
+    const isOwnProfile = req.userId && req.userId.toString() === userId;
     const query: any = { author: userId };
     if (!isOwnProfile) {
       query.isPublic = true;

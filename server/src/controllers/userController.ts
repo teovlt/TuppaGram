@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { User } from "../models/userModel.js";
+import { Notification } from "../models/notificationModel.js";
 import bcrypt from "bcryptjs";
 import { userRoles } from "../utils/enums/userRoles.js";
 import { createLog } from "./logController.js";
@@ -343,3 +344,51 @@ export const getAuthTypesStat = async (req: Request, res: Response): Promise<voi
     res.status(500).json({ error: err.message });
   }
 };
+/**
+ * @function toggleFollow
+ * @description Follows or unfollows a user.
+ */
+export const toggleFollow = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { idToFollow } = req.params;
+    const currentUserId = req.userId;
+
+    if (idToFollow === currentUserId.toString()) {
+      res.status(400).json({ error: "Vous ne pouvez pas vous suivre vous-même" });
+      return;
+    }
+
+    const userToFollow = await User.findById(idToFollow);
+    const currentUser = await User.findById(currentUserId);
+
+    if (!userToFollow || !currentUser) {
+      res.status(404).json({ error: "Utilisateur non trouvé" });
+      return;
+    }
+
+    const isFollowing = currentUser.following.includes(userToFollow._id);
+
+    if (isFollowing) {
+      // Unfollow
+      await User.findByIdAndUpdate(currentUserId, { $pull: { following: userToFollow._id } });
+      await User.findByIdAndUpdate(idToFollow, { $pull: { followers: currentUser._id } });
+      res.status(200).json({ message: "Utilisateur désabonné", following: false });
+    } else {
+      // Follow
+      await User.findByIdAndUpdate(currentUserId, { $push: { following: userToFollow._id } });
+      await User.findByIdAndUpdate(idToFollow, { $push: { followers: currentUser._id } });
+      
+      // Notify
+      await new Notification({
+        recipient: userToFollow._id,
+        type: "follow",
+        link: `/user/${currentUser.username}`,
+      }).save();
+
+      res.status(200).json({ message: "Utilisateur suivi", following: true });
+    }
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+};
+

@@ -13,6 +13,11 @@ const UserSchema = new Schema<IUser>(
     role: { type: String, default: userRoles.USER },
     avatar: { type: String, default: "" },
     auth_type: { type: String, default: authTypes.LOCAL },
+    bio: { type: String, default: "" },
+    dietary_preference: { type: String, default: "none" },
+    language_preference: { type: String, default: "fr" },
+    followers: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    following: [{ type: Schema.Types.ObjectId, ref: "User" }],
   },
   { timestamps: true },
 );

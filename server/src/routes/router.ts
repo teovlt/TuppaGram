@@ -4,6 +4,11 @@ import { userRouter } from "./usersRoutes.js";
 import { authRouter } from "./authenticationRoutes.js";
 import { logRouter } from "./logsRoutes.js";
 import { uploadRouter } from "./uploadRoutes.js";
+import recipeRoutes from "./recipeRoutes.js";
+import postRoutes from "./postRoutes.js";
+import interactionRoutes from "./interactionRoutes.js";
+import notificationRoutes from "./notificationRoutes.js";
+import reportRoutes from "./reportRoutes.js";
 
 import path from "path";
 import { fileURLToPath } from "url";
@@ -20,6 +25,13 @@ router.use("/api/logs", logRouter); // Logging routes
 // // UPLOADS routes
 router.use("/api/uploads", uploadRouter); // File upload routes
 router.use("/uploads", express.static(path.join(__dirname, "../../uploads"))); // Serve uploaded files
+
+// // MARMITON & SOCIAL routes
+router.use("/api/recipes", recipeRoutes);
+router.use("/api/posts", postRoutes);
+router.use("/api/interactions", interactionRoutes);
+router.use("/api/notifications", notificationRoutes);
+router.use("/api/reports", reportRoutes);
 
 /**
  * @route GET /api/ping

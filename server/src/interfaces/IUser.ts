@@ -11,4 +11,9 @@ export interface IUser extends Document {
   avatar: string;
   auth_type: string;
   fullname?: string; // virtual
+  bio: string;
+  dietary_preference: string;
+  language_preference: string;
+  followers: mongoose.Types.ObjectId[];
+  following: mongoose.Types.ObjectId[];
 }

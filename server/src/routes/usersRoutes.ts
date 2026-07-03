@@ -8,6 +8,7 @@ import {
   updatePassword,
   deleteAccount,
   getAuthTypesStat,
+  toggleFollow,
 } from "../controllers/userController.js";
 import { verifyToken } from "../middlewares/verifyToken.js";
 
@@ -70,3 +71,11 @@ userRouter.delete("/delete/account", verifyToken(), deleteAccount);
  * @middleware verifyToken("admin") - Ensures the user has an admin role to access this route.
  */
 userRouter.get("/stats/authTypes", verifyToken({ role: "admin" }), getAuthTypesStat);
+
+/**
+ * @route POST /:idToFollow/follow
+ * @description Toggles follow status for a specific user.
+ * @middleware verifyToken() - Ensures the user is authenticated.
+ */
+userRouter.post("/:idToFollow/follow", verifyToken(), toggleFollow);
+

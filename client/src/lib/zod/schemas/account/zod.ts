@@ -15,6 +15,7 @@ export const updateAccountSchema = z.object({
     .max(25, { message: "Le nom d'utilisateur doit comporter au maximum 25 caractères." })
     .regex(/^[^A-Z\s]+$/, { message: "Le nom d'utilisateur ne doit pas contenir d'espaces ni de lettres majuscules." }),
   email: z.string().email({ message: "Adresse e-mail invalide." }),
+  bio: z.string().max(160, { message: "La bio ne peut excéder 160 caractères." }).optional().or(z.literal('')),
 });
 
 export const updatePasswordSchema = z

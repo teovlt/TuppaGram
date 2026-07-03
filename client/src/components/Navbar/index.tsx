@@ -2,8 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ThemeChanger } from "./themeChanger";
 import { NotificationSheet } from "../customs/NotificationSheet";
 import { Separator } from "../ui/separator";
-import { Home, House, LogOut, Menu, User, Wrench, X, Utensils, PlusSquare } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { Home, LogOut, User, Wrench, Utensils, PlusSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { useAuthContext } from "@/contexts/authContext";
@@ -21,27 +20,9 @@ import { useLogout } from "@/hooks/useLogout";
 import { AvatarWithStatusCell } from "@/components/customs/avatarStatusCell";
 
 export const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
   const navigate = useNavigate();
   const { logout, loading } = useLogout();
   const { authUser } = useAuthContext();
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node) && isOpen) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen]);
-
-  const closeDialogAndNavigate = (link: string) => {
-    setIsOpen(false);
-    navigate(link);
-  };
 
   const mainLinks = [
     { label: "Accueil", path: "/", icon: Home, auth: true },
@@ -53,15 +34,19 @@ export const Navbar = () => {
     { label: "Tableau de bord", path: "/admin/dashboard", icon: Wrench, auth: authUser?.role === "admin" },
   ];
 
-  const mobileLinks = [
-    ...mainLinks,
-    { label: "Créer", path: "/create", icon: PlusSquare, auth: true },
-    ...profileLinks
+  const mobileNavLinks = authUser ? [
+    { label: "Accueil", path: "/", icon: Home },
+    { label: "Recettes", path: "/recipes", icon: Utensils },
+    { label: "Créer", path: "/create", icon: PlusSquare },
+    { label: "Profil", path: `/user/${authUser._id}`, icon: User },
+  ] : [
+    { label: "Accueil", path: "/", icon: Home },
+    { label: "Recettes", path: "/recipes", icon: Utensils },
   ];
 
   return (
     <>
-      <div className="sticky top-0 left-0 right-0 z-50 border-b bg-background">
+      <header className="sticky top-0 z-50 w-full border-b bg-background">
         {/* Desktop */}
         <div className="hidden select-none md:flex items-center justify-between p-4 px-8 text-accent">
           <div className="text-3xl font-extrabold">
@@ -132,55 +117,48 @@ export const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile */}
+        {/* Mobile Header */}
         <div className="flex items-center justify-between p-4 md:hidden">
-          <div className="text-3xl font-extrabold text-accent">
+          <div className="text-2xl font-extrabold text-accent">
             <Link to="/">Tuppagram</Link>
           </div>
-          <Menu onClick={() => setIsOpen(!isOpen)} className="cursor-pointer" />
-        </div>
-
-        <div
-          ref={menuRef}
-          className={cn(
-            "fixed top-0 right-0 w-4/5 h-screen overflow-hidden bg-background transition-transform duration-300 ease-in-out z-20",
-            isOpen ? "translate-x-0" : "translate-x-full",
-          )}
-        >
-          <div className="flex justify-end">
-            <X onClick={() => setIsOpen(!isOpen)} className="m-4 cursor-pointer" />
-          </div>
-          <div className="flex flex-col gap-4 p-8 pt-2">
-            {mobileLinks
-              .filter((link) => link.auth === undefined || link.auth)
-              .map((link) => (
-                <Button
-                  key={link.path}
-                  onClick={() => closeDialogAndNavigate(link.path)}
-                  variant="link"
-                  className="flex items-center justify-start gap-4"
-                >
-                  <link.icon className="w-4 h-4" />
-                  {link.label}
-                </Button>
-              ))}
-            {authUser && (
+          <div className="flex items-center gap-3">
+            {authUser ? (
               <>
-                <Separator />
-                <Button onClick={() => logout()} variant="link" disabled={loading} className="flex items-center justify-start gap-4">
-                  <LogOut className="w-4 h-4" />
-                  Se déconnecter
+                <NotificationSheet />
+                <ThemeChanger />
+                <Button variant="ghost" size="icon" onClick={logout} disabled={loading} className="text-destructive">
+                  <LogOut className="w-5 h-5" />
                 </Button>
               </>
+            ) : (
+              <Button onClick={() => navigate("/login")} variant="default" size="sm">
+                Connexion
+              </Button>
             )}
-            <Separator />
-            <div className="flex items-center justify-center gap-4">
-              <NotificationSheet />
-              <ThemeChanger />
-            </div>
           </div>
         </div>
-      </div>
+      </header>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around h-16 border-t md:hidden bg-background pb-safe">
+        {mobileNavLinks.map((link) => {
+          const isActive = window.location.pathname === link.path;
+          return (
+            <button
+              key={link.path}
+              onClick={() => navigate(link.path)}
+              className={cn(
+                "flex flex-col items-center justify-center w-full h-full gap-1 transition-colors",
+                isActive ? "text-primary" : "text-muted-foreground hover:text-primary"
+              )}
+            >
+              <link.icon className={cn("w-6 h-6", isActive && "fill-primary/20")} />
+              <span className="text-[10px] font-medium">{link.label}</span>
+            </button>
+          );
+        })}
+      </nav>
     </>
   );
 };

@@ -12,4 +12,7 @@ export interface UserInterface {
   __v?: number;
   avatar?: string;
   auth_type: string;
+  bio?: string;
+  followers?: string[];
+  following?: string[];
 }

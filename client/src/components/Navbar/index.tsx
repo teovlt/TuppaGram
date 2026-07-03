@@ -43,20 +43,20 @@ export const Navbar = () => {
     navigate(link);
   };
 
-  const navLinks = [
+  const mainLinks = [
     { label: "Accueil", path: "/", icon: Home, auth: true },
     { label: "Recettes", path: "/recipes", icon: Utensils, auth: true },
-    { label: "Créer", path: "/create", icon: PlusSquare, auth: true },
+  ];
+
+  const profileLinks = [
     { label: "Mon profil", path: `/user/${authUser?._id}`, icon: User, auth: true },
     { label: "Tableau de bord", path: "/admin/dashboard", icon: Wrench, auth: authUser?.role === "admin" },
   ];
 
   const mobileLinks = [
-    { label: "Accueil", path: "/", icon: House },
-    { label: "Recettes", path: "/recipes", icon: Utensils, auth: !!authUser },
-    { label: "Créer", path: "/create", icon: PlusSquare, auth: !!authUser },
-    { label: "Mon profil", path: `/user/${authUser?._id}`, icon: User, auth: !!authUser },
-    { label: "Tableau de bord", path: "/admin/dashboard", icon: Wrench, auth: authUser?.role === "admin" },
+    ...mainLinks,
+    { label: "Créer", path: "/create", icon: PlusSquare, auth: true },
+    ...profileLinks
   ];
 
   return (
@@ -71,13 +71,17 @@ export const Navbar = () => {
             <div className="flex items-center gap-2">
               {authUser ? (
                 <>
-                  {navLinks
+                  {mainLinks
                     .filter((link) => link.auth)
                     .map((link) => (
-                      <Button key={link.path} onClick={() => navigate(link.path)} variant="link">
+                      <Button key={link.path} onClick={() => navigate(link.path)} variant="ghost" className="font-medium">
                         {link.label}
                       </Button>
                     ))}
+                    
+                  <Button onClick={() => navigate("/create")} className="gap-2 text-white bg-primary hover:bg-primary/90">
+                    <PlusSquare size={18} /> Créer
+                  </Button>
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild className="hover:cursor-pointer">
@@ -85,13 +89,13 @@ export const Navbar = () => {
                         <AvatarWithStatusCell user={authUser} />
                       </span>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-40">
+                    <DropdownMenuContent className="w-48" align="end">
                       <DropdownMenuLabel>
                         {authUser.name} {authUser.forename}
                       </DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       <DropdownMenuGroup>
-                        {navLinks
+                        {profileLinks
                           .filter((link) => link.auth)
                           .map((link) => (
                             <DropdownMenuItem
@@ -99,20 +103,16 @@ export const Navbar = () => {
                               className="flex items-center gap-2 hover:cursor-pointer"
                               onClick={() => navigate(link.path)}
                             >
+                              <link.icon className="w-4 h-4" />
                               {link.label}
-                              <DropdownMenuShortcut>
-                                <link.icon className="w-4 h-4" />
-                              </DropdownMenuShortcut>
                             </DropdownMenuItem>
                           ))}
                       </DropdownMenuGroup>
                       <DropdownMenuSeparator />
                       <DropdownMenuGroup>
-                        <DropdownMenuItem className="hover:cursor-pointer" onClick={() => logout()} disabled={loading}>
+                        <DropdownMenuItem className="flex items-center gap-2 text-destructive hover:text-destructive hover:cursor-pointer" onClick={() => logout()} disabled={loading}>
+                          <LogOut className="w-4 h-4" />
                           Se déconnecter
-                          <DropdownMenuShortcut>
-                            <LogOut className="w-4 h-4" />
-                          </DropdownMenuShortcut>
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
                     </DropdownMenuContent>

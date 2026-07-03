@@ -11,6 +11,11 @@ import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
 import { Loading } from "@/components/customs/loading";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { MoreVertical, Edit2, Image as ImageIcon, X } from "lucide-react";
 
 export const PostCard = ({ post, onPostDeleted }: { post: any; onPostDeleted?: (id: string) => void }) => {
   const { authUser } = useAuthContext();
@@ -80,6 +85,60 @@ export const PostCard = ({ post, onPostDeleted }: { post: any; onPostDeleted?: (
 
   const isAuthor = authUser?._id === post.author?._id;
 
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState(post.text || "");
+  const [editPhotoUrl, setEditPhotoUrl] = useState(post.photos?.[0] || "");
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editText && !editPhotoUrl) {
+      toast.error("Le post ne peut pas être vide");
+      return;
+    }
+    try {
+      setIsUpdating(true);
+      await axiosConfig.put(`/posts/${post._id}`, {
+        text: editText,
+        photos: editPhotoUrl ? [editPhotoUrl] : [],
+        recipeRef: post.recipeRef?._id || "none"
+      });
+      toast.success("Post mis à jour !");
+      post.text = editText;
+      post.photos = editPhotoUrl ? [editPhotoUrl] : [];
+      setIsEditing(false);
+    } catch (e) {
+      toast.error("Erreur lors de la modification");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleEditImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("L'image ne doit pas dépasser 5 Mo");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      setIsUpdating(true);
+      const res = await axiosConfig.post("/uploads/image", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setEditPhotoUrl(res.data.url);
+    } catch (err: any) {
+      toast.error("Erreur lors de l'upload");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   return (
     <Card className="w-full mb-6">
       <CardHeader className="flex flex-row items-center justify-between pb-4">
@@ -100,9 +159,21 @@ export const PostCard = ({ post, onPostDeleted }: { post: any; onPostDeleted?: (
           </div>
         </div>
         {isAuthor && (
-          <Button variant="ghost" size="icon" onClick={handleDelete}>
-            <Trash2 className="w-4 h-4 text-destructive" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <MoreVertical className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setIsEditing(true)} className="cursor-pointer">
+                <Edit2 className="w-4 h-4 mr-2" /> Modifier
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDelete} className="cursor-pointer text-destructive focus:text-destructive">
+                <Trash2 className="w-4 h-4 mr-2" /> Supprimer
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </CardHeader>
       
@@ -180,6 +251,57 @@ export const PostCard = ({ post, onPostDeleted }: { post: any; onPostDeleted?: (
           </div>
         )}
       </CardFooter>
+
+      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Modifier le post</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleEditSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label>Message</Label>
+              <Textarea 
+                value={editText}
+                onChange={(e) => setEditText(e.target.value)}
+                placeholder="Votre message..."
+                rows={4}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Photo</Label>
+              {editPhotoUrl ? (
+                <div className="relative inline-block w-full">
+                  <img src={editPhotoUrl} alt="Preview" className="object-cover w-full h-32 border rounded-lg" />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    className="absolute w-6 h-6 rounded-full top-1 right-1"
+                    onClick={() => setEditPhotoUrl("")}
+                  >
+                    <X size={12} />
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center w-full">
+                  <label className="flex flex-col items-center justify-center w-full h-24 transition-colors border-2 border-dashed rounded-lg cursor-pointer border-muted-foreground/25 hover:bg-muted/50">
+                    <div className="flex flex-col items-center justify-center text-muted-foreground">
+                      <ImageIcon className="w-6 h-6 mb-1 opacity-50" />
+                      <p className="text-sm font-medium">Ajouter une photo</p>
+                    </div>
+                    <input type="file" className="hidden" accept="image/jpeg,image/png,image/webp" onChange={handleEditImageUpload} disabled={isUpdating} />
+                  </label>
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end pt-4">
+              <Button type="submit" disabled={isUpdating}>
+                {isUpdating ? "Modification..." : "Sauvegarder"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };

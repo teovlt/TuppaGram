@@ -6,6 +6,7 @@ import {
   getPostById,
   deletePost,
   getUserPosts,
+  updatePost,
 } from "../controllers/postController.js";
 
 const router = express.Router();
@@ -13,6 +14,7 @@ const router = express.Router();
 // Protected feed & post creation
 router.get("/feed", verifyToken(), getFeed);
 router.post("/", verifyToken(), createPost);
+router.put("/:id", verifyToken(), updatePost);
 router.delete("/:id", verifyToken(), deletePost);
 
 // Public-facing profile posts and specific post view

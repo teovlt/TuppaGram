@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { Image as ImageIcon, X } from "lucide-react";
 
 export const CreatePostForm = () => {
   const navigate = useNavigate();
@@ -59,6 +60,31 @@ export const CreatePostForm = () => {
     }
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("L'image ne doit pas dépasser 5 Mo");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      setLoading(true);
+      const res = await axiosConfig.post("/uploads/image", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setPhotoUrl(res.data.url);
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || "Erreur lors de l'upload de l'image");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
@@ -72,12 +98,32 @@ export const CreatePostForm = () => {
       </div>
 
       <div className="space-y-2">
-        <Label>Ajouter une photo (URL)</Label>
-        <Input 
-          value={photoUrl}
-          onChange={(e) => setPhotoUrl(e.target.value)}
-          placeholder="https://..."
-        />
+        <Label>Ajouter une photo</Label>
+        {photoUrl ? (
+          <div className="relative inline-block">
+            <img src={photoUrl} alt="Preview" className="object-cover w-full max-w-sm border rounded-lg aspect-video" />
+            <Button
+              type="button"
+              variant="destructive"
+              size="icon"
+              className="absolute w-8 h-8 rounded-full top-2 right-2"
+              onClick={() => setPhotoUrl("")}
+            >
+              <X size={16} />
+            </Button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center w-full max-w-sm">
+            <label className="flex flex-col items-center justify-center w-full h-32 transition-colors border-2 border-dashed rounded-lg cursor-pointer border-muted-foreground/25 hover:bg-muted/50">
+              <div className="flex flex-col items-center justify-center pt-5 pb-6 text-muted-foreground">
+                <ImageIcon className="w-8 h-8 mb-2 opacity-50" />
+                <p className="text-sm font-medium">Cliquez pour uploader</p>
+                <p className="text-xs">JPG, PNG ou WEBP (Max 5Mo)</p>
+              </div>
+              <input type="file" className="hidden" accept="image/jpeg,image/png,image/webp" onChange={handleImageUpload} disabled={loading} />
+            </label>
+          </div>
+        )}
       </div>
 
       <div className="space-y-2">

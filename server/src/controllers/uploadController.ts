@@ -58,3 +58,27 @@ export const updateUserAvatar = async (req: Request, res: Response): Promise<voi
     res.status(500).json({ error: err.message });
   }
 };
+
+export const uploadGenericImage = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ error: "Aucun fichier fourni" });
+      return;
+    }
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(req.file.mimetype)) {
+      res.status(400).json({ error: "Seuls les formats JPG, PNG et WEBP sont acceptés" });
+      return;
+    }
+
+    const imageUrl = `${req.protocol}://${req.get("host")}/uploads/images/${req.file.filename}`;
+
+    res.status(200).json({
+      message: "Image uploadée avec succès",
+      url: imageUrl,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+};

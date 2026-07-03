@@ -89,6 +89,37 @@ export const deletePost = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
+export const updatePost = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) {
+      res.status(404).json({ error: "Post non trouvé" });
+      return;
+    }
+
+    if (!post.author.equals(req.userId)) {
+      res.status(403).json({ error: "Non autorisé" });
+      return;
+    }
+
+    const { text, photos, recipeRef } = req.body;
+    
+    post.text = text;
+    post.photos = photos || [];
+    post.recipeRef = recipeRef && recipeRef !== "none" ? recipeRef : undefined;
+
+    await post.save();
+    
+    const populatedPost = await Post.findById(post._id)
+      .populate("author", "username avatar fullname")
+      .populate("recipeRef", "title photos averageRating");
+
+    res.status(200).json({ message: "Post mis à jour", post: populatedPost });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export const getUserPosts = async (req: Request, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;

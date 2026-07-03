@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Trash2, Plus } from "lucide-react";
+import { Trash2, Plus, Image as ImageIcon, X } from "lucide-react";
 import { toast } from "sonner";
 
 export const CreateRecipeForm = () => {
@@ -26,10 +26,7 @@ export const CreateRecipeForm = () => {
   const [ingredients, setIngredients] = useState<string[]>([""]);
   const [steps, setSteps] = useState<string[]>([""]);
   const [diet, setDiet] = useState<string[]>([]);
-  
-  // Note: For images, a real app would use FormData and a file input, 
-  // but for simplicity in this boiler we'll just allow image URLs or omit them.
-  const [photoUrl, setPhotoUrl] = useState("");
+  const [photoUrls, setPhotoUrls] = useState<string[]>([]);
 
   const handleAddIngredient = () => setIngredients([...ingredients, ""]);
   const handleRemoveIngredient = (index: number) => {
@@ -51,6 +48,35 @@ export const CreateRecipeForm = () => {
     setSteps(newSteps);
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("L'image ne doit pas dépasser 5 Mo");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      setLoading(true);
+      const res = await axiosConfig.post("/uploads/image", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setPhotoUrls([...photoUrls, res.data.url]);
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || "Erreur lors de l'upload de l'image");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRemovePhoto = (index: number) => {
+    setPhotoUrls(photoUrls.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title || !formData.description || !formData.preparationTime) {
@@ -66,7 +92,7 @@ export const CreateRecipeForm = () => {
         ingredients: ingredients.filter(i => i.trim() !== ""),
         steps: steps.filter(s => s.trim() !== ""),
         diet,
-        photos: photoUrl ? [photoUrl] : [],
+        photos: photoUrls,
       };
 
       const res = await axiosConfig.post("/recipes", payload);
@@ -110,16 +136,41 @@ export const CreateRecipeForm = () => {
             min="1"
           />
         </div>
+      </div>
 
-        <div className="space-y-2">
-          <Label>Image (URL)</Label>
-          <Input 
-            value={photoUrl}
-            onChange={(e) => setPhotoUrl(e.target.value)}
-            placeholder="https://..."
-          />
+      <div className="space-y-2">
+        <Label>Photos de la recette</Label>
+        {photoUrls.length > 0 && (
+          <div className="flex flex-wrap gap-4 mb-4">
+            {photoUrls.map((url, i) => (
+              <div key={i} className="relative inline-block w-32 h-32">
+                <img src={url} alt={`Preview ${i}`} className="object-cover w-full h-full border rounded-lg" />
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  className="absolute w-6 h-6 rounded-full top-1 right-1"
+                  onClick={() => handleRemovePhoto(i)}
+                >
+                  <X size={12} />
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+        
+        <div className="flex items-center w-full max-w-sm">
+          <label className="flex flex-col items-center justify-center w-full h-24 transition-colors border-2 border-dashed rounded-lg cursor-pointer border-muted-foreground/25 hover:bg-muted/50">
+            <div className="flex flex-col items-center justify-center text-muted-foreground">
+              <ImageIcon className="w-6 h-6 mb-1 opacity-50" />
+              <p className="text-sm font-medium">Ajouter une photo</p>
+            </div>
+            <input type="file" className="hidden" accept="image/jpeg,image/png,image/webp" onChange={handleImageUpload} disabled={loading} />
+          </label>
         </div>
+      </div>
 
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label>Type de plat</Label>
           <Select value={formData.type} onValueChange={(val) => setFormData({ ...formData, type: val })}>

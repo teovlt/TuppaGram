@@ -4,6 +4,10 @@ import { LayoutWrapper } from "./layoutWrapper";
 import { Account } from "@/pages/Account";
 import { ProtectedRoute } from "@/router/protectedRoute";
 import { Home } from "@/pages/Home";
+import { RecipesIndex } from "@/pages/Recipes/index";
+import { RecipeDetail } from "@/pages/Recipes/detail";
+import { CreateContentIndex } from "@/pages/Create/index";
+import { Profile } from "@/pages/Profile/index";
 import { Index } from "@/pages/Admin";
 import { Logs } from "@/pages/Admin/components/logs";
 import { Users } from "@/pages/Admin/components/users";
@@ -73,6 +77,38 @@ export const Router = () => {
           element={
             <ProtectedRoute authRequired={true}>
               <Account />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/recipes"
+          element={
+            <ProtectedRoute authRequired={true}>
+              <RecipesIndex />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/recipes/:id"
+          element={
+            <ProtectedRoute authRequired={true}>
+              <RecipeDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/create"
+          element={
+            <ProtectedRoute authRequired={true}>
+              <CreateContentIndex />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/user/:id"
+          element={
+            <ProtectedRoute authRequired={true}>
+              <Profile />
             </ProtectedRoute>
           }
         />

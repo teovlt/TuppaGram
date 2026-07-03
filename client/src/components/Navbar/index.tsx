@@ -1,7 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import { ThemeChanger } from "./themeChanger";
+import { NotificationSheet } from "../customs/NotificationSheet";
 import { Separator } from "../ui/separator";
-import { Home, House, LogOut, Menu, User, Wrench, X } from "lucide-react";
+import { Home, House, LogOut, Menu, User, Wrench, X, Utensils, PlusSquare } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
@@ -44,12 +45,16 @@ export const Navbar = () => {
 
   const navLinks = [
     { label: "Accueil", path: "/", icon: Home, auth: true },
+    { label: "Recettes", path: "/recipes", icon: Utensils, auth: true },
+    { label: "Créer", path: "/create", icon: PlusSquare, auth: true },
     { label: "Mon compte", path: "/account", icon: User, auth: true },
     { label: "Tableau de bord", path: "/admin/dashboard", icon: Wrench, auth: authUser?.role === "admin" },
   ];
 
   const mobileLinks = [
     { label: "Accueil", path: "/", icon: House },
+    { label: "Recettes", path: "/recipes", icon: Utensils, auth: !!authUser },
+    { label: "Créer", path: "/create", icon: PlusSquare, auth: !!authUser },
     { label: "Mon compte", path: "/account", icon: User, auth: !!authUser },
     { label: "Tableau de bord", path: "/admin/dashboard", icon: Wrench, auth: authUser?.role === "admin" },
   ];
@@ -120,7 +125,8 @@ export const Navbar = () => {
               )}
             </div>
             <Separator orientation="vertical" className="h-8" />
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center justify-between gap-2">
+              <NotificationSheet />
               <ThemeChanger />
             </div>
           </div>
@@ -169,6 +175,7 @@ export const Navbar = () => {
             )}
             <Separator />
             <div className="flex items-center justify-center gap-4">
+              <NotificationSheet />
               <ThemeChanger />
             </div>
           </div>

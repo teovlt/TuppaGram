@@ -12,6 +12,19 @@ import { generateRandomAvatar } from "../utils/generateRandomAvatar.js";
 import { logLevels } from "../utils/enums/logLevels.js";
 import { Constants } from "../constants/constants.js";
 
+export const getUserById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const user = await User.findById(req.params.id).select("-password -role");
+    if (!user) {
+      res.status(404).json({ error: "Utilisateur non trouvé" });
+      return;
+    }
+    res.status(200).json({ user });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 /**
  * @function getUsers
  * @description Retrieves all users sorted by creation date.

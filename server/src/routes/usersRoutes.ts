@@ -9,6 +9,7 @@ import {
   deleteAccount,
   getAuthTypesStat,
   toggleFollow,
+  getUserById,
 } from "../controllers/userController.js";
 import { verifyToken } from "../middlewares/verifyToken.js";
 
@@ -20,6 +21,13 @@ export const userRouter: Router = express.Router();
  * @middleware verifyToken({ role: "admin" }) - Ensures the user has an admin role to access this route.
  */
 userRouter.get("/", verifyToken({ role: "admin" }), getUsers);
+
+/**
+ * @route GET /public/:id
+ * @description Retrieves a specific user profile by ID.
+ * @middleware verifyToken() - Ensures the user is authenticated.
+ */
+userRouter.get("/public/:id", verifyToken(), getUserById);
 
 /**
  * @route POST /

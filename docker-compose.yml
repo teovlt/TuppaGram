@@ -1,0 +1,71 @@
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7
+    container_name: tuppagram-mongodb
+    restart: unless-stopped
+    ports:
+      - "27018:27017" # Use 27018 externally to avoid conflict with local MongoDB
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - tuppagram-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Backend API Server
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: tuppagram-server
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - MONG_URI=mongodb://mongodb:27017/tuppagram
+      - MONG_URI_TEST=mongodb://mongodb:27017/tuppagram-test
+      - SECRET_ACCESS_TOKEN=${SECRET_ACCESS_TOKEN:-your-secret-token}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:8080}
+    volumes:
+      - server_uploads:/app/uploads
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - tuppagram-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3001"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Frontend Client
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL:-http://localhost:3001}
+    container_name: tuppagram-client
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - server
+    networks:
+      - tuppagram-network
+
+networks:
+  tuppagram-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+  server_uploads:

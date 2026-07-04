@@ -1,253 +1,143 @@
-# MERN-APP BOILERPLATE README
-
-Welcome to the MERN-APP boilerplate, a complete solution to quickly start a modern and secure full-stack application. This project is designed to help you create robust applications with secure authentication, role management, and much more.
-
-## Table of Contents
-
-<details>
-  <summary>📑 Table of Contents</summary>
+<div align="center">
+  <img src="https://img.shields.io/badge/MERN-Stack-4EA94B?style=for-the-badge&logo=mongodb" alt="MERN Stack" />
+  <img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react" alt="React 19" />
+  <img src="https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwind-css" alt="Tailwind CSS" />
   
-  - [Author](#author)
-  - [Technologies Used](#technologies-used)
-  - [Requirements](#requirements)
-  - [Backend](#backend)
-  - [Frontend](#frontend)
-  - [Firebase OAuth Setup](#firebase-oauth-setup)
-  - [Run the Application](#run-the-application)
-  - [Application Configuration](#application-configuration)
-  - [Unit Tests](#unit-tests)
-  - [Husky](#husky)
-  - [Features](#features)
-  - [Contribution](#contribution)
-  
-</details>
+  <h1>🍲 Tuppagram</h1>
+  <p><strong>The Social Network for Food Lovers & Home Chefs</strong></p>
+</div>
 
-## Author
+---
 
-👨‍💻 **[Téo Villet](https://github.com/teovlt)** - Web Developer
+## 📖 About The Project
 
-## Technologies Used
+**Tuppagram** is a full-stack MERN application designed to bring culinary enthusiasts together. Far beyond a simple recipe book, it acts as a fully-fledged social network where users can share their daily meals, publish detailed step-by-step recipes, follow their favorite creators, and interact through likes and comments.
 
-![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)
-![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
-![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
-![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
+Originally built on a robust, secure boilerplate, Tuppagram features a warm, modern visual identity (terracotta & cream), an intuitive "Native App" feel for mobile users (Bottom Navigation Bar), and a robust backend to handle social networking data relationships.
 
-## Requirements
+### 🎯 Goal & Purpose
 
-📦 Before starting, make sure you have the following installed:
+The goal of Tuppagram is to provide a seamless, aesthetically pleasing, and highly interactive platform for food sharing. Whether it's a quick snap of today's lunch or an elaborate family recipe with multi-step instructions and photo galleries, Tuppagram is the place to document and discover culinary inspiration. ^ih419w
 
-- [**Node.js**](https://nodejs.org/en): v22.x or higher
-- [**pnpm**](https://pnpm.io/fr/): v10.x or higher
-- [**Git**](https://git-scm.com/): v2.47.x or higher (for Husky hooks)
-- [**MongoDB**](https://www.mongodb.com/): v8.0.9 or higher
-- **A modern browser** (Chrome, Firefox, etc.)
+---
 
-You can check your installed versions using:
+## ✨ Key Features
+
+- **Social Feed & Interactions**: Create text and photo posts, link posts to specific recipes, like, and comment.
+- **Advanced Recipe Engine**: Create comprehensive recipes including preparation time, difficulty, dynamic ingredients lists, step-by-step instructions, categories, and multiple photos.
+- **User Profiles & Networking**: Follow/Unfollow users, view their specific posts and recipes, and explore their follower network.
+- **Robust Authentication**: JWT-based authentication, password hashing, and optional Firebase Google OAuth integration.
+- **Image Management**: Seamless photo uploads for avatars, posts, and recipes, handled via `multer` locally.
+- **Modern UI/UX**: Built with Tailwind CSS and Shadcn UI. Fully responsive with a dedicated Mobile Bottom Tab Bar layout and Light/Dark mode.
+- **Real-Time Readiness**: Integrated WebSocket capabilities for online status tracking and real-time social notifications.
+
+---
+
+## 🏗️ Architecture & Code Structure
+
+The project follows a standard decoupled Client/Server architecture using **TypeScript** across the entire stack.
+
+### Backend (`/server`)
+
+An Express.js REST API using MongoDB (via Mongoose) to handle data storage.
+
+- **`src/models/`**: Mongoose schemas defining the data structure (`User`, `Post`, `Recipe`, `Comment`, `Like`, `Log`, `Config`).
+- **`src/controllers/`**: Core business logic. Separated by domain (e.g., `postController.ts`, `recipeController.ts`).
+- **`src/routes/`**: API endpoint definitions, mapped to their respective controllers and protected by the `verifyToken` middleware.
+- **`src/middlewares/`**: Request interceptors (Authentication, File upload configurations via Multer).
+- **`src/utils/`**: Helper functions, Enums, and custom Error handling.
+- **`uploads/`**: Local storage directory for user avatars, post images, and recipe photos.
+
+### Frontend (`/client`)
+
+A Vite-powered React 19 application utilizing Tailwind CSS v4 and React Router v7.
+
+- **`src/components/`**: Reusable UI components (mostly from Shadcn UI, plus layout components like `Navbar`, `Footer`, `PostCard`).
+- **`src/pages/`**: View-level components mapping directly to application routes (`Home`, `Profile`, `Create`, `Recipes`).
+- **`src/contexts/`**: Global state management (e.g., `authContext.tsx` for user sessions).
+- **`src/lib/`**: Utilities, specifically Zod schemas for robust form validation (`react-hook-form` + `@hookform/resolvers/zod`).
+- **`src/config/`**: Axios configuration and interceptors for authenticated API calls.
+
+---
+
+## 🚀 Getting Started
+
+### Requirements
+
+- **Node.js**: v22.x or higher
+- **pnpm**: v10.x or higher
+- **MongoDB**: v8.x or higher (Local or Atlas)
+
+### 1. Clone the repository
 
 ```bash
-node -v
-pnpm -v
-git --version
+git clone https://github.com/your-username/Tuppagram.git
+cd Tuppagram
 ```
 
-## Backend
-
-🔙 Navigate to the `server` directory.  
-You need to create a **.env** file containing the backend environment variables.
-
-Example:
-
-```env
-PORT=
-MONG_URI=
-MONG_URI_TEST=
-SECRET_ACCESS_TOKEN=
-CORS_ORIGIN=
-```
-
-- **PORT** → The port your server will use.
-- **MONG_URI** → MongoDB connection string (don’t forget to allow your IP in MongoDB Atlas if applicable).
-- **MONG_URI_TEST** → Test DB URI (data gets wiped during tests — use a separate DB).
-- **SECRET_ACCESS_TOKEN** → JWT token secret (use this command : _openssl rand -base64 64_).
-- **CORS_ORIGIN** → Frontend URL for CORS setup.
-
-Refer to the `.env.example` file in the `server` directory for guidance.
-
-## Frontend
-
-🎨 Navigate to the `client` directory and create a **.env** file:
-
-```env
-VITE_API_URL=
-```
-
-- **VITE_API_URL** → URL of your backend server (e.g. `http://localhost:5000`)
-
-See `.env.example` in `client` for reference.
-
-## Firebase OAuth Setup
-
-**Non mandatory**
-🔑 If you want to enable Google OAuth for user authentication, follow these steps to set up Firebase:
-
-🔐 This app uses **Firebase Authentication with Google OAuth** to let users sign in effortlessly.
-
-Here’s how to set it up quickly:
-
-1. Go to [console.firebase.google.com](https://console.firebase.google.com) and **create a new project**.
-2. Once inside your project, click on **“Authentication”** in the sidebar.
-3. Click on **“Get started”**, then select **Google** as the sign-in method.
-4. Enable the provider:
-   - (Optional) Change the **app name**
-   - Add a **support email**
-   - Save ✅
-
-Next up:
-
-5. Go back to your **Firebase dashboard**, and click the **web icon `</>`** to register a new web app.
-6. Enter your app name and move to the next step.  
-   You’ll get a config object like this:
-
-```js
-const firebaseConfig = {
-  apiKey: "XXXX",
-  authDomain: "XXXX.firebaseapp.com",
-  projectId: "XXXX",
-  storageBucket: "XXXX.appspot.com",
-  messagingSenderId: "XXXX",
-  appId: "XXXX",
-  measurementId: "XXXX", // 👉 not needed
-};
-```
-
-7. Copy every line **except `measurementId`** into your `.env` file inside the `client` folder:
-
-```env
-VITE_API_URL=...
-
-VITE_FIREBASE_API_KEY=XXXX
-VITE_FIREBASE_AUTH_DOMAIN=XXXX.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=XXXX
-VITE_FIREBASE_STORAGE_BUCKET=XXXX.appspot.com
-VITE_FIREBASE_MESSAGING_SENDER_ID=XXXX
-VITE_FIREBASE_APP_ID=XXXX
-```
-
-8. Finally, click **“Go to Console”** to complete the setup.  
-   Your app is now connected to Firebase and ready to support Google OAuth login 🚀
-
-## Run the Application
-
-⚡ Install and run the frontend and backend separately in two terminals:
-
-**Terminal 1: Start the Frontend**
-
-```bash
-cd client
-pnpm i
-pnpm dev
-```
-
-**Terminal 2: Start the Backend**
+### 2. Backend Setup
 
 ```bash
 cd server
-pnpm i
+pnpm install
+```
+
+Create a `.env` file in the `server` directory:
+
+```env
+PORT=5000
+MONG_URI=mongodb://127.0.0.1:27017/tuppagram
+SECRET_ACCESS_TOKEN=your_super_secret_jwt_token
+CORS_ORIGIN=http://localhost:5173
+```
+
+Start the development server:
+
+```bash
 pnpm dev
 ```
 
-You should see the following messages in the terminal:
+### 3. Frontend Setup
+
+Open a new terminal window:
 
 ```bash
-Server listenning on port ... 🚀
-Connected to the database 🧰
+cd client
+pnpm install
 ```
 
-Once both are running, go to [http://localhost:5173](http://localhost:5173) to see the application.
+Create a `.env` file in the `client` directory:
 
-## Application Configuration
+```env
+VITE_API_URL=http://localhost:5000/api
+```
 
-This boilerplate includes a `config` table in the database which stores dynamic configuration values, including the **application name**.
-
-🧩 After cloning and launching the app:
-
-1. **Register a new user** via the **Register** page (first user is an administrator by default).
-2. Access the **Admin Dashboard**.
-3. Go to the **Settings** section.
-4. Set the configuration you want for your application.
-
-Once configured, your application is fully ready to be extended for your use case.
-
-## Unit Tests
-
-🧪 First, turn off the server if it's running, then run:
+Start the Vite development server:
 
 ```bash
-pnpm run test
+pnpm dev
 ```
 
-To check full test coverage:
+Your app will now be running at `http://localhost:5173`.
 
-```bash
-pnpm run coverage
-```
+---
 
-The coverage report will be generated in the `server/coverage` folder.  
-Don’t forget to restart the server afterward.
+## 🎨 Styling & Design Guidelines
 
-## Husky
+- **Tailwind CSS**: Utility classes are used exclusively. Avoid writing custom CSS unless absolutely necessary (added to `index.css`).
+- **Shadcn UI**: Base components (Buttons, Dialogs, Forms, Inputs) are generated via Shadcn. Modify their logic in `src/components/ui` if necessary.
+- **Theme**: Tuppagram uses a specific Terracotta/Cream color palette, managed via CSS variables in `client/src/index.css`.
+- **Responsive Design**: Ensure all views use `md:` prefixes to support both the desktop header layout and the mobile Bottom Navigation layout.
 
-🐶 **Husky Integration**:
+---
 
-This project uses **Husky** to automatically run code formatting and lint checks before each commit, ensuring a consistent codebase.
-If the pre-commit hook doesn’t work, verify that husky have the correct permissions:
+## 🤝 Contributing
 
-```bash
-chmod +x .husky/pre-commit
-```
+When contributing to Tuppagram:
 
-### Benefits
+1. Ensure your code is strictly typed with TypeScript interfaces.
+2. Form interactions must be validated using `Zod` schemas.
+3. Make sure to maintain the visual consistency of the Terracotta theme.
+4. Test responsive behaviors down to mobile viewport widths (375px).
 
-- **Consistent Style**
-- **Less Manual Work**
-- **Reliable Codebase**
-
-## Features
-
-🚀 **Features:**
-
-- 📜 Log Management
-- 👥 User CRUD (Create, Read, Update, Delete)
-- 🔒 JWT-based Authentication
-- 🏢 Role-based Access Control (Admin, User)
-- ✅ Unit Testing with Coverage
-- 📝 Fully Commented Backend Code
-- 🔗 API Requests with Axios
-- 📊 Admin Dashboard
-- 🔐 Protected & Conditional Routing
-- 🌙 Light/Dark Theme Toggle
-- 🌍 i18n Multi-language Support
-- 🎨 TailwindCSS + ShadCN UI
-- 📋 Ready-to-use Auth Forms
-- 🔄 Prettier Formatting
-- 🖼 Avatar Upload with GIF support
-- 📡 Real-time Online Status via WebSocket
-- 🧩 Application Configuration via Database
-- 🔑 OAuth with Google via Firebase
-
-## Contribution
-
-🤝 We welcome contributions! To contribute:
-
-1. **Fork** the repository.
-2. Create a new branch: `git checkout -b feature/my-feature`.
-3. Commit your changes: `git commit -m 'Add my feature'`.
-4. Push to GitHub: `git push origin feature/my-feature`.
-5. Open a Pull Request.
-
-### Contribution Guidelines
-
-- Comment your code when necessary.
-- Follow naming and style conventions.
-- Add unit tests when applicable.
+Happy Coding! 🍳👩‍🍳

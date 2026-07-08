@@ -2,6 +2,7 @@ import { User } from "../models/userModel.js";
 import { Constants } from "../constants/constants.js";
 import { bucket } from "../lib/firebase.js";
 import { deleteFile } from "../utils/fileUploadUtils.js";
+import { Request, Response } from "express";
 
 /**
  * Helper to upload a buffer to Firebase Storage and return the public URL.

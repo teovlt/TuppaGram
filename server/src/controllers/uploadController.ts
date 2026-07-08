@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import fs from "fs";
 import path from "path";
-import { User } from "../models/userModel";
+import { User } from "../models/userModel.js";
 import { Constants } from "../constants/constants";
 
 /**

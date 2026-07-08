@@ -2,7 +2,6 @@ import { User } from "../models/userModel.js";
 import { Constants } from "../constants/constants.js";
 import { bucket } from "../lib/firebase.js";
 import { deleteFile } from "../utils/fileUploadUtils.js";
-import { Request, Response } from "express";
 
 /**
  * Helper to upload a buffer to Firebase Storage and return the public URL.
@@ -29,7 +28,7 @@ export const uploadToFirebase = async (
   return `https://storage.googleapis.com/${bucket.name}/${fullPath}`;
 };
 
-export const updateUserAvatar = async (req: Request, res: Response) => {
+export const updateUserAvatar = async (req, res) => {
   try {
     const userId = req.params.id;
     const user = await User.findById(userId);
@@ -81,7 +80,7 @@ export const updateUserAvatar = async (req: Request, res: Response) => {
  * @function uploadImage
  * @description Uploads an image to Firebase Storage and returns its URL.
  */
-export const uploadImage = async (req: Request, res: Response): Promise<void> => {
+export const uploadImage = async (req, res): Promise<void> => {
   try {
     if (!req.file) {
       res.status(400).json({ error: "Aucun fichier fourni" });

@@ -23,4 +23,4 @@ const setFolder = (folder: string) => (req: any, res: any, next: any) => {
  */
 uploadRouter.post("/avatar/:id", verifyToken(), uploadConfig.single("avatar"), updateUserAvatar);
 
-uploadRouter.post("/image", verifyToken(), uploadConfig.single("image"), uploadImage);
+uploadRouter.post("/image", verifyToken(), uploadConfig.single("image"), setFolder("images"), uploadImage);

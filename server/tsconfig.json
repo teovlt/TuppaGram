@@ -6,7 +6,8 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "lib": ["ES2022"] // sans "DOM"
   },
   "ts-node": {
     "esm": true

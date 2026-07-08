@@ -32,6 +32,10 @@ services:
       - MONG_URI_TEST=mongodb://mongodb:27017/tuppagram-test
       - SECRET_ACCESS_TOKEN=${SECRET_ACCESS_TOKEN:-your-secret-token}
       - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:8080}
+      - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID:-}
+      - FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL:-}
+      - FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY:-}
+      - FIREBASE_BUCKET_NAME=${FIREBASE_BUCKET_NAME:-}
     volumes:
       - server_uploads:/app/uploads
     depends_on:

@@ -32,10 +32,10 @@ export function OAuth() {
         setAuthUser(res.data.user);
         navigate("/");
       } catch (err: any) {
-        const errorMessage = err?.response?.data?.error;
-        if (errorMessage === "User not found, lets register !") {
+        if (err?.response?.status === 404) {
           navigate("/register/google", { state: userData });
         } else {
+          const errorMessage = err?.response?.data?.error;
           toast.error(errorMessage || "Erreur d'authentification");
         }
       }

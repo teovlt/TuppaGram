@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Post } from "../models/postModel.js";
 import { User } from "../models/userModel.js";
+import { Notification } from "../models/notificationModel.js";
 import { getAcceptedFriendIds } from "./friendshipController.js";
 
 export const createPost = async (req: Request, res: Response): Promise<void> => {
@@ -20,6 +21,18 @@ export const createPost = async (req: Request, res: Response): Promise<void> => 
 
     await newPost.save();
     
+    if (visibility === "public" || visibility === "friends") {
+      const friendIds = await getAcceptedFriendIds(authorId.toString());
+      if (friendIds.length > 0) {
+        const notifications = friendIds.map((friendId) => ({
+          recipient: friendId,
+          type: "new_post",
+          link: `/user/${authorId}`,
+        }));
+        await Notification.insertMany(notifications);
+      }
+    }
+
     // Populate the newly created post immediately for the frontend
     const populatedPost = await Post.findById(newPost._id)
       .populate("author", "username avatar fullname")

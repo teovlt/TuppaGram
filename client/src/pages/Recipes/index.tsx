@@ -47,6 +47,9 @@ export const RecipesIndex = () => {
 
   useEffect(() => {
     fetchRecipes();
+    // Fetch users initially
+    handleUserSearch(undefined, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type, difficulty]);
 
   const handleRecipeSearch = (e: React.FormEvent) => {
@@ -57,7 +60,8 @@ export const RecipesIndex = () => {
   // --- User search logic ---
   const handleUserSearch = async (e?: React.FormEvent, resetPage = true) => {
     e?.preventDefault();
-    if (resetPage && (!userQuery.trim() || userQuery.trim().length < 2)) return;
+    const query = userQuery.trim();
+    if (resetPage && query.length === 1) return; // Allow 0 length for initial fetch, but block 1 char
 
     const pageToFetch = resetPage ? 1 : userPage + 1;
 
@@ -209,7 +213,7 @@ export const RecipesIndex = () => {
                 className="pl-10"
               />
             </div>
-            <Button type="submit" disabled={userLoading || userQuery.trim().length < 2}>
+            <Button type="submit" disabled={userLoading || userQuery.trim().length === 1}>
               Rechercher
             </Button>
           </form>
@@ -243,16 +247,10 @@ export const RecipesIndex = () => {
                     </div>
                   )}
                 </>
-              ) : userQuery.trim().length >= 2 ? (
-                <div className="py-12 text-center text-muted-foreground">
-                  <Users className="w-12 h-12 mx-auto mb-4 opacity-30" />
-                  <p>Aucun utilisateur trouvé pour « {userQuery} »</p>
-                </div>
               ) : (
                 <div className="py-12 text-center text-muted-foreground">
-                  <Search className="w-12 h-12 mx-auto mb-4 opacity-30" />
-                  <p className="text-lg font-medium">Trouvez des amis</p>
-                  <p className="mt-1">Recherchez par nom d'utilisateur pour ajouter des amis</p>
+                  <Users className="w-12 h-12 mx-auto mb-4 opacity-30" />
+                  <p>Aucun utilisateur trouvé.</p>
                 </div>
               )}
             </div>

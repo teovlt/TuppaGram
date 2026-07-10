@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { Recipe } from "../models/recipeModel.js";
 import { User } from "../models/userModel.js";
+import { Notification } from "../models/notificationModel.js";
+import { getAcceptedFriendIds } from "./friendshipController.js";
 
 // Create a new recipe
 export const createRecipe = async (req: Request, res: Response): Promise<void> => {
@@ -44,6 +46,19 @@ export const createRecipe = async (req: Request, res: Response): Promise<void> =
     });
 
     await newRecipe.save();
+
+    if (isPublic) {
+      const friendIds = await getAcceptedFriendIds(authorId.toString());
+      if (friendIds.length > 0) {
+        const notifications = friendIds.map((friendId) => ({
+          recipient: friendId,
+          type: "new_recipe",
+          link: `/recipes/${newRecipe._id}`,
+        }));
+        await Notification.insertMany(notifications);
+      }
+    }
+
     res.status(201).json({ message: "Recette créée avec succès", recipe: newRecipe });
   } catch (error: any) {
     res.status(500).json({ error: error.message });

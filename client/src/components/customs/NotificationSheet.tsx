@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { axiosConfig } from "@/config/axiosConfig";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Bell, Heart, MessageCircle, UserPlus, CheckCheck } from "lucide-react";
+import { Bell, Heart, MessageCircle, UserPlus, CheckCheck, Utensils } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -52,6 +52,10 @@ export const NotificationSheet = () => {
       case "like": return <Heart size={16} className="text-red-500 fill-red-500" />;
       case "comment": return <MessageCircle size={16} className="text-blue-500" />;
       case "follow": return <UserPlus size={16} className="text-green-500" />;
+      case "friend_request": return <UserPlus size={16} className="text-orange-500" />;
+      case "friend_accepted": return <CheckCheck size={16} className="text-green-500" />;
+      case "new_recipe": return <Utensils size={16} className="text-accent" />;
+      case "new_post": return <Bell size={16} className="text-blue-500" />;
       default: return <Bell size={16} />;
     }
   };
@@ -61,6 +65,10 @@ export const NotificationSheet = () => {
       case "like": return "A aimé votre publication";
       case "comment": return "A commenté votre publication";
       case "follow": return "A commencé à vous suivre";
+      case "friend_request": return "Vous a envoyé une demande d'ami";
+      case "friend_accepted": return "A accepté votre demande d'ami";
+      case "new_recipe": return "Un ami a publié une nouvelle recette";
+      case "new_post": return "Un ami a publié un nouveau post";
       default: return "Nouvelle interaction";
     }
   };

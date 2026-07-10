@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ThemeChanger } from "./themeChanger";
 import { NotificationSheet } from "../customs/NotificationSheet";
 import { Separator } from "../ui/separator";
-import { Home, LogOut, User, Wrench, Utensils, PlusSquare } from "lucide-react";
+import { Home, LogOut, User, Wrench, Utensils, PlusSquare, Compass } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { useAuthContext } from "@/contexts/authContext";
@@ -26,7 +26,7 @@ export const Navbar = () => {
 
   const mainLinks = [
     { label: "Accueil", path: "/", icon: Home, auth: true },
-    { label: "Recettes", path: "/recipes", icon: Utensils, auth: true },
+    { label: "Découvrir", path: "/recipes", icon: Compass, auth: true },
   ];
 
   const profileLinks = [
@@ -36,12 +36,12 @@ export const Navbar = () => {
 
   const mobileNavLinks = authUser ? [
     { label: "Accueil", path: "/", icon: Home },
-    { label: "Recettes", path: "/recipes", icon: Utensils },
+    { label: "Découvrir", path: "/recipes", icon: Compass },
     { label: "Créer", path: "/create", icon: PlusSquare },
     { label: "Profil", path: `/user/${authUser._id}`, icon: User },
   ] : [
     { label: "Accueil", path: "/", icon: Home },
-    { label: "Recettes", path: "/recipes", icon: Utensils },
+    { label: "Découvrir", path: "/recipes", icon: Compass },
   ];
 
   return (

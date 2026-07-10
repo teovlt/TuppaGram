@@ -6,6 +6,7 @@ import { Rating } from "../models/ratingModel.js";
 import { Notification } from "../models/notificationModel.js";
 import { Post } from "../models/postModel.js";
 import { Recipe } from "../models/recipeModel.js";
+import jwt from "jsonwebtoken";
 
 // Helper to notify author
 const notifyAuthor = async (recipientId: string, type: string, link: string) => {
@@ -96,7 +97,23 @@ export const getLikesCount = async (req: Request, res: Response): Promise<void> 
   try {
     const { referenceModel, referenceId } = req.params;
     const count = await Like.countDocuments({ referenceModel, referenceId });
-    res.status(200).json({ count });
+
+    let isLiked = false;
+    const authHeader = req.headers.authorization;
+    if (authHeader) {
+      try {
+        const token = authHeader.split(" ")[1];
+        const decoded = jwt.verify(token, process.env.SECRET_ACCESS_TOKEN as string) as any;
+        if (decoded && decoded.id) {
+          const userLike = await Like.findOne({ referenceModel, referenceId, user: decoded.id });
+          if (userLike) isLiked = true;
+        }
+      } catch (e) {
+        // Ignore token verification errors for this public route
+      }
+    }
+
+    res.status(200).json({ count, isLiked });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }

@@ -14,7 +14,7 @@ const router = express.Router();
 // Public routes
 router.get("/", getPublicRecipes);
 router.get("/:id", getRecipeById);
-router.get("/user/:userId", getUserRecipes); // Depending on implementation, we could protect this, but usually profiles are public
+router.get("/user/:userId", verifyToken(), getUserRecipes);
 
 // Protected routes
 router.post("/", verifyToken(), createRecipe);

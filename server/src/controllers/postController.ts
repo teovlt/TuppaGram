@@ -1,17 +1,21 @@
 import { Request, Response } from "express";
 import { Post } from "../models/postModel.js";
 import { User } from "../models/userModel.js";
+import { getAcceptedFriendIds } from "./friendshipController.js";
 
 export const createPost = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { text, photos, recipeRef } = req.body;
+    const { text, photos, recipeRef, tags, location, visibility } = req.body;
     const authorId = req.userId;
 
     const newPost = new Post({
       text,
-      photos,
+      photos: photos || [],
       author: authorId,
       recipeRef: recipeRef || undefined,
+      tags: tags || [],
+      location: location || "",
+      visibility: visibility || "public",
     });
 
     await newPost.save();
@@ -27,25 +31,33 @@ export const createPost = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-// Feed: Get posts from following users + own posts
+// Feed: Get posts from friends + own posts (using friendship model)
 export const getFeed = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = req.userId;
-    const user = await User.findById(userId);
 
-    if (!user) {
-      res.status(404).json({ error: "Utilisateur non trouvé" });
-      return;
-    }
+    // Get all accepted friend IDs
+    const friendIds = await getAcceptedFriendIds(userId.toString());
 
-    const following = user.following || [];
-    const authors = [...following, userId];
+    // Build feed query:
+    // - Own posts (all visibilities)
+    // - Friends' posts with visibility 'public' or 'friends'
+    // - Non-friends' posts with visibility 'public' (not included — feed is friends only)
+    const feedQuery = {
+      $or: [
+        { author: userId }, // all own posts
+        {
+          author: { $in: friendIds },
+          visibility: { $in: ["public", "friends"] },
+        },
+      ],
+    };
 
-    const posts = await Post.find({ author: { $in: authors } })
+    const posts = await Post.find(feedQuery)
       .populate("author", "username avatar fullname")
       .populate("recipeRef", "title photos averageRating")
       .sort({ createdAt: -1 })
-      .limit(50); // limit to recent 50 for now
+      .limit(50);
 
     res.status(200).json({ posts });
   } catch (error: any) {
@@ -102,11 +114,14 @@ export const updatePost = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
-    const { text, photos, recipeRef } = req.body;
+    const { text, photos, recipeRef, tags, location, visibility } = req.body;
     
     post.text = text;
     post.photos = photos || [];
     post.recipeRef = recipeRef && recipeRef !== "none" ? recipeRef : undefined;
+    post.tags = tags || [];
+    post.location = location || "";
+    post.visibility = visibility || "public";
 
     await post.save();
     
@@ -123,7 +138,23 @@ export const updatePost = async (req: Request, res: Response): Promise<void> => 
 export const getUserPosts = async (req: Request, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
-    const posts = await Post.find({ author: userId })
+    const currentUserId = req.userId;
+
+    // Check if viewer is the author or a friend
+    const isOwnProfile = currentUserId && currentUserId.toString() === userId;
+
+    let visibilityFilter: any = { visibility: "public" };
+
+    if (isOwnProfile) {
+      visibilityFilter = {}; // see all own posts
+    } else if (currentUserId) {
+      const friendIds = await getAcceptedFriendIds(currentUserId.toString());
+      if (friendIds.includes(userId)) {
+        visibilityFilter = { visibility: { $in: ["public", "friends"] } };
+      }
+    }
+
+    const posts = await Post.find({ author: userId, ...visibilityFilter })
       .populate("author", "username avatar fullname")
       .populate("recipeRef", "title photos")
       .sort({ createdAt: -1 });

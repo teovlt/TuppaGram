@@ -36,10 +36,10 @@ export const Home = () => {
         <div className="flex flex-col items-center justify-center p-8 mt-12 space-y-6 text-center border border-dashed rounded-xl bg-card">
           <h2 className="text-2xl font-bold">Votre fil d'actualité est vide</h2>
           <p className="text-muted-foreground">
-            Abonnez-vous à d'autres utilisateurs ou partagez vos propres recettes pour voir de l'activité ici.
+            Ajoutez des amis pour voir leur activité ici, ou partagez vos propres créations culinaires.
           </p>
           <Link to="/recipes">
-            <Button variant="outline">Découvrir des recettes</Button>
+            <Button variant="outline">Découvrir et ajouter des amis</Button>
           </Link>
           <Link to="/create">
             <Button className="gap-2">

@@ -6,16 +6,27 @@ import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Heart, MessageCircle, Send, Star, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Heart, MessageCircle, Send, Star, Trash2, MapPin, Globe, Users, Lock, ChevronLeft, ChevronRight } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
-import { Loading } from "@/components/customs/loading";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { MoreVertical, Edit2, Image as ImageIcon, X } from "lucide-react";
+
+const VisibilityIcon = ({ visibility }: { visibility: string }) => {
+  switch (visibility) {
+    case "friends":
+      return <Users size={12} className="text-blue-500" />;
+    case "private":
+      return <Lock size={12} className="text-yellow-600" />;
+    default:
+      return <Globe size={12} className="text-green-500" />;
+  }
+};
 
 export const PostCard = ({ post, onPostDeleted }: { post: any; onPostDeleted?: (id: string) => void }) => {
   const { authUser } = useAuthContext();
@@ -24,19 +35,18 @@ export const PostCard = ({ post, onPostDeleted }: { post: any; onPostDeleted?: (
   const [comments, setComments] = useState<any[]>([]);
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState("");
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
 
   useEffect(() => {
-    // Initial fetch for likes and comments
     const fetchInteractions = async () => {
       try {
         const [likesRes, commentsRes] = await Promise.all([
           axiosConfig.get(`/interactions/likes/Post/${post._id}/count`),
-          axiosConfig.get(`/interactions/comments/Post/${post._id}`)
+          axiosConfig.get(`/interactions/comments/Post/${post._id}`),
         ]);
         setLikesCount(likesRes.data.count);
+        setIsLiked(likesRes.data.isLiked || false);
         setComments(commentsRes.data.comments);
-        // We'd need an endpoint to check if specifically liked by me, or backend could send it
-        // For now we assume false until clicked, or we handle it optimistically.
       } catch (e) {
         console.error(e);
       }
@@ -48,10 +58,10 @@ export const PostCard = ({ post, onPostDeleted }: { post: any; onPostDeleted?: (
     try {
       const res = await axiosConfig.post("/interactions/likes", {
         referenceModel: "Post",
-        referenceId: post._id
+        referenceId: post._id,
       });
       setIsLiked(res.data.liked);
-      setLikesCount(prev => res.data.liked ? prev + 1 : prev - 1);
+      setLikesCount((prev) => (res.data.liked ? prev + 1 : prev - 1));
     } catch (e) {
       toast.error("Erreur lors du like");
     }
@@ -64,7 +74,7 @@ export const PostCard = ({ post, onPostDeleted }: { post: any; onPostDeleted?: (
       const res = await axiosConfig.post("/interactions/comments", {
         referenceModel: "Post",
         referenceId: post._id,
-        text: newComment
+        text: newComment,
       });
       setComments([...comments, res.data.comment]);
       setNewComment("");
@@ -84,10 +94,11 @@ export const PostCard = ({ post, onPostDeleted }: { post: any; onPostDeleted?: (
   };
 
   const isAuthor = authUser?._id === post.author?._id;
+  const photos = post.photos || [];
 
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(post.text || "");
-  const [editPhotoUrl, setEditPhotoUrl] = useState(post.photos?.[0] || "");
+  const [editPhotoUrl, setEditPhotoUrl] = useState(photos[0] || "");
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleEditSubmit = async (e: React.FormEvent) => {
@@ -101,7 +112,10 @@ export const PostCard = ({ post, onPostDeleted }: { post: any; onPostDeleted?: (
       await axiosConfig.put(`/posts/${post._id}`, {
         text: editText,
         photos: editPhotoUrl ? [editPhotoUrl] : [],
-        recipeRef: post.recipeRef?._id || "none"
+        recipeRef: post.recipeRef?._id || "none",
+        tags: post.tags || [],
+        location: post.location || "",
+        visibility: post.visibility || "public",
       });
       toast.success("Post mis à jour !");
       post.text = editText;
@@ -117,15 +131,12 @@ export const PostCard = ({ post, onPostDeleted }: { post: any; onPostDeleted?: (
   const handleEditImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     if (file.size > 5 * 1024 * 1024) {
       toast.error("L'image ne doit pas dépasser 5 Mo");
       return;
     }
-
     const formData = new FormData();
     formData.append("image", file);
-
     try {
       setIsUpdating(true);
       const res = await axiosConfig.post("/uploads/image", formData, {
@@ -150,12 +161,22 @@ export const PostCard = ({ post, onPostDeleted }: { post: any; onPostDeleted?: (
             </Avatar>
           </Link>
           <div className="flex flex-col">
-            <Link to={`/user/${post.author?._id}`} className="font-semibold hover:underline">
-              {post.author?.username}
-            </Link>
-            <span className="text-xs text-muted-foreground">
-              {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: fr })}
-            </span>
+            <div className="flex items-center gap-2">
+              <Link to={`/user/${post.author?._id}`} className="font-semibold hover:underline">
+                {post.author?.username}
+              </Link>
+              <VisibilityIcon visibility={post.visibility || "public"} />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">
+                {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: fr })}
+              </span>
+              {post.location && (
+                <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
+                  <MapPin size={10} /> {post.location}
+                </span>
+              )}
+            </div>
           </div>
         </div>
         {isAuthor && (
@@ -176,13 +197,57 @@ export const PostCard = ({ post, onPostDeleted }: { post: any; onPostDeleted?: (
           </DropdownMenu>
         )}
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         {post.text && <p className="text-sm whitespace-pre-wrap">{post.text}</p>}
-        
-        {post.photos && post.photos.length > 0 && (
-          <div className="overflow-hidden border rounded-xl bg-muted">
-            <img src={post.photos[0]} alt="Post media" className="object-cover w-full max-h-96" />
+
+        {/* Tags */}
+        {post.tags && post.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {post.tags.map((tag: string) => (
+              <Badge key={tag} variant="secondary" className="text-xs font-normal">
+                #{tag}
+              </Badge>
+            ))}
+          </div>
+        )}
+
+        {/* Photo carousel */}
+        {photos.length > 0 && (
+          <div className="relative overflow-hidden border rounded-xl bg-muted">
+            <img src={photos[currentPhotoIndex]} alt="Post media" className="object-cover w-full max-h-96" />
+            {photos.length > 1 && (
+              <>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="absolute w-8 h-8 rounded-full left-2 top-1/2 -translate-y-1/2 opacity-80 hover:opacity-100"
+                  onClick={() => setCurrentPhotoIndex((prev) => (prev > 0 ? prev - 1 : photos.length - 1))}
+                >
+                  <ChevronLeft size={16} />
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="absolute w-8 h-8 rounded-full right-2 top-1/2 -translate-y-1/2 opacity-80 hover:opacity-100"
+                  onClick={() => setCurrentPhotoIndex((prev) => (prev < photos.length - 1 ? prev + 1 : 0))}
+                >
+                  <ChevronRight size={16} />
+                </Button>
+                {/* Dots indicator */}
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                  {photos.map((_: string, i: number) => (
+                    <button
+                      key={i}
+                      onClick={() => setCurrentPhotoIndex(i)}
+                      className={`w-2 h-2 rounded-full transition-all ${
+                        i === currentPhotoIndex ? "bg-white w-4" : "bg-white/50"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -199,7 +264,7 @@ export const PostCard = ({ post, onPostDeleted }: { post: any; onPostDeleted?: (
               <div className="flex flex-col justify-center">
                 <span className="font-semibold line-clamp-1">{post.recipeRef.title}</span>
                 <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Star size={12} className="text-yellow-500 fill-yellow-500" /> 
+                  <Star size={12} className="text-yellow-500 fill-yellow-500" />
                   {post.recipeRef.averageRating > 0 ? post.recipeRef.averageRating.toFixed(1) : "Nouveau"}
                 </span>
               </div>
@@ -238,8 +303,8 @@ export const PostCard = ({ post, onPostDeleted }: { post: any; onPostDeleted?: (
               {comments.length === 0 && <p className="text-xs text-center text-muted-foreground">Aucun commentaire</p>}
             </div>
             <form onSubmit={handleComment} className="flex items-center gap-2">
-              <Input 
-                placeholder="Ajouter un commentaire..." 
+              <Input
+                placeholder="Ajouter un commentaire..."
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 className="flex-1 rounded-full"
@@ -260,7 +325,7 @@ export const PostCard = ({ post, onPostDeleted }: { post: any; onPostDeleted?: (
           <form onSubmit={handleEditSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label>Message</Label>
-              <Textarea 
+              <Textarea
                 value={editText}
                 onChange={(e) => setEditText(e.target.value)}
                 placeholder="Votre message..."

@@ -9,7 +9,7 @@ import { Loading } from "@/components/customs/loading";
 import { PostCard } from "@/pages/Home/components/PostCard";
 import { Link } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Star, Edit2 } from "lucide-react";
+import { Star, Edit2, UserPlus, Clock, UserCheck, UserMinus, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Account } from "@/pages/Account";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -21,6 +21,8 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { updateAccountSchema } from "@/lib/zod/schemas/account/zod";
 import { InputFile } from "@/components/customs/inputFile";
+import { FriendsList } from "@/pages/Profile/components/FriendsList";
+import { PendingRequests } from "@/pages/Profile/components/PendingRequests";
 
 export const Profile = () => {
   const { id } = useParams<{ id: string }>();
@@ -32,9 +34,13 @@ export const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [openEditProfile, setOpenEditProfile] = useState(false);
+  const [openFriendsList, setOpenFriendsList] = useState(false);
+
+  // Friendship state
+  const [friendshipStatus, setFriendshipStatus] = useState<any>(null);
+  const [friendsCount, setFriendsCount] = useState(0);
 
   const isOwnProfile = authUser?._id === id;
-  const isFollowing = authUser && profileUser?.followers?.includes(authUser._id);
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -52,6 +58,24 @@ export const Profile = () => {
         const recipesRes = await axiosConfig.get(`/recipes/user/${id}`);
         setRecipes(recipesRes.data.recipes);
 
+        // Get friendship status (if not own profile)
+        if (!isOwnProfile) {
+          try {
+            const statusRes = await axiosConfig.get(`/friendships/status/${id}`);
+            setFriendshipStatus(statusRes.data);
+          } catch {
+            setFriendshipStatus({ status: "none" });
+          }
+        }
+
+        // Get friends count
+        try {
+          const friendsRes = await axiosConfig.get(`/friendships/friends/${id}`);
+          setFriendsCount(friendsRes.data.friends.length);
+        } catch {
+          setFriendsCount(0);
+        }
+
       } catch (error) {
         toast.error("Impossible de charger le profil");
       } finally {
@@ -62,19 +86,38 @@ export const Profile = () => {
     fetchProfileData();
   }, [id]);
 
-  const handleToggleFollow = async () => {
+  // --- Friendship handlers ---
+  const handleSendRequest = async () => {
     try {
-      const res = await axiosConfig.post(`/users/${id}/follow`);
+      const res = await axiosConfig.post(`/friendships/request/${id}`);
       toast.success(res.data.message);
-      
-      // Update local state to reflect new follower count
-      if (res.data.following) {
-        setProfileUser({ ...profileUser, followers: [...(profileUser.followers || []), authUser?._id] });
-      } else {
-        setProfileUser({ ...profileUser, followers: (profileUser.followers || []).filter((fId: string) => fId !== authUser?._id) });
-      }
-    } catch (e) {
-      toast.error("Erreur lors de l'abonnement");
+      setFriendshipStatus({ status: "pending", direction: "outgoing", friendship: res.data.friendship });
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || "Erreur lors de l'envoi");
+    }
+  };
+
+  const handleAcceptRequest = async () => {
+    if (!friendshipStatus?.friendship?._id) return;
+    try {
+      await axiosConfig.put(`/friendships/accept/${friendshipStatus.friendship._id}`);
+      toast.success("Demande acceptée !");
+      setFriendshipStatus({ status: "accepted", friendship: friendshipStatus.friendship });
+      setFriendsCount((prev) => prev + 1);
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || "Erreur");
+    }
+  };
+
+  const handleRemoveFriend = async () => {
+    if (!friendshipStatus?.friendship?._id) return;
+    try {
+      await axiosConfig.delete(`/friendships/${friendshipStatus.friendship._id}`);
+      toast.success("Ami supprimé");
+      setFriendshipStatus({ status: "none", friendship: null });
+      setFriendsCount((prev) => Math.max(prev - 1, 0));
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || "Erreur");
     }
   };
 
@@ -98,14 +141,11 @@ export const Profile = () => {
       setUpdateLoading(true);
       const response = await axiosConfig.put(`/users/${authUser?._id}`, values);
       toast.success(response.data.message);
-      // Ensure context is updated and profile data is updated
-      // We are editing OUR profile, and we are ON our profile
       if (typeof setProfileUser === 'function') {
         setProfileUser(response.data.user);
       }
-      // If there's an auth context method to update
       if ((window as any).__updateAuthUser) {
-        (window as any).__updateAuthUser(response.data.user); // Hacky fallback if setAuthUser not exported
+        (window as any).__updateAuthUser(response.data.user);
       }
       setOpenEditProfile(false);
     } catch (error: any) {
@@ -138,8 +178,52 @@ export const Profile = () => {
     }
   };
 
+  // --- Friendship button rendering ---
+  const renderFriendshipButton = () => {
+    if (isOwnProfile) return null;
+    const status = friendshipStatus?.status || "none";
+    const direction = friendshipStatus?.direction;
+
+    if (status === "none") {
+      return (
+        <Button onClick={handleSendRequest} className="gap-2">
+          <UserPlus size={16} /> Ajouter en ami
+        </Button>
+      );
+    }
+    if (status === "pending" && direction === "outgoing") {
+      return (
+        <Button variant="secondary" disabled className="gap-2">
+          <Clock size={16} /> Demande envoyée
+        </Button>
+      );
+    }
+    if (status === "pending" && direction === "incoming") {
+      return (
+        <div className="flex gap-2">
+          <Button onClick={handleAcceptRequest} className="gap-2">
+            <UserPlus size={16} /> Accepter
+          </Button>
+          <Button variant="outline" onClick={handleRemoveFriend}>
+            Refuser
+          </Button>
+        </div>
+      );
+    }
+    if (status === "accepted") {
+      return (
+        <Button variant="outline" onClick={handleRemoveFriend} className="gap-2 text-green-600 hover:text-destructive hover:border-destructive">
+          <UserCheck size={16} /> Ami
+        </Button>
+      );
+    }
+    return null;
+  };
+
   if (loading) return <Loading />;
   if (!profileUser) return <div className="p-8 text-center">Profil introuvable</div>;
+
+  const tabCount = isOwnProfile ? 4 : 3;
 
   return (
     <div className="container max-w-4xl p-4 mx-auto md:p-8">
@@ -160,26 +244,19 @@ export const Profile = () => {
                 </Button>
               )}
             </div>
-            {!isOwnProfile && (
-              <Button 
-                variant={isFollowing ? "outline" : "default"} 
-                onClick={handleToggleFollow}
-              >
-                {isFollowing ? "Se désabonner" : "S'abonner"}
-              </Button>
-            )}
+            {renderFriendshipButton()}
           </div>
 
           <div className="flex gap-6 text-sm">
             <div className="flex flex-col items-center md:flex-row md:gap-1">
               <span className="font-bold">{posts.length}</span> publications
             </div>
-            <div className="flex flex-col items-center md:flex-row md:gap-1">
-              <span className="font-bold">{profileUser.followers?.length || 0}</span> abonnés
-            </div>
-            <div className="flex flex-col items-center md:flex-row md:gap-1">
-              <span className="font-bold">{profileUser.following?.length || 0}</span> abonnements
-            </div>
+            <button
+              className="flex flex-col items-center md:flex-row md:gap-1 hover:opacity-75 transition-opacity"
+              onClick={() => setOpenFriendsList(true)}
+            >
+              <span className="font-bold">{friendsCount}</span> amis
+            </button>
           </div>
 
           <div className="text-center md:text-left">
@@ -189,7 +266,7 @@ export const Profile = () => {
         </div>
       </div>
 
-      {/* Tabs for Posts and Recipes */}
+      {/* Tabs for Posts, Recipes, Settings */}
       <Tabs defaultValue="posts" className="w-full mt-8">
         <TabsList className={`grid w-full mb-8 ${isOwnProfile ? "grid-cols-3" : "grid-cols-2"}`}>
           <TabsTrigger value="posts">Publications</TabsTrigger>
@@ -231,7 +308,9 @@ export const Profile = () => {
                     </CardHeader>
                     <CardContent className="p-4 pt-0">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="font-medium text-accent">{recipe.preparationTime} min</span>
+                        <span className="font-medium text-accent">
+                          {(recipe.preparationTime || 0) + (recipe.cookingTime || 0)} min
+                        </span>
                         <span className="flex items-center gap-1 text-yellow-500">
                           <Star size={16} fill="currentColor" /> {recipe.averageRating > 0 ? recipe.averageRating.toFixed(1) : "Nouveau"}
                         </span>
@@ -244,6 +323,8 @@ export const Profile = () => {
           </div>
         </TabsContent>
 
+
+
         {isOwnProfile && (
           <TabsContent value="settings">
             <div className="w-full">
@@ -252,6 +333,14 @@ export const Profile = () => {
           </TabsContent>
         )}
       </Tabs>
+
+      {/* Friends List Dialog */}
+      <FriendsList
+        open={openFriendsList}
+        onOpenChange={setOpenFriendsList}
+        userId={id!}
+        isOwnProfile={isOwnProfile}
+      />
 
       {/* Edit Profile Dialog */}
       <Dialog open={openEditProfile} onOpenChange={setOpenEditProfile}>

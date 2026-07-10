@@ -18,8 +18,7 @@ router.put("/:id", verifyToken(), updatePost);
 router.delete("/:id", verifyToken(), deletePost);
 
 // Public-facing profile posts and specific post view
-// A middleware can be used to inject req.userId if user is logged in, but here we can just use protectRoute or leave it open
-router.get("/user/:userId", getUserPosts);
+router.get("/user/:userId", verifyToken(), getUserPosts);
 router.get("/:id", getPostById);
 
 export default router;

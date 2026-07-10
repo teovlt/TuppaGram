@@ -10,6 +10,7 @@ import {
   getAuthTypesStat,
   toggleFollow,
   getUserById,
+  searchUsers,
 } from "../controllers/userController.js";
 import { verifyToken } from "../middlewares/verifyToken.js";
 
@@ -21,6 +22,13 @@ export const userRouter: Router = express.Router();
  * @middleware verifyToken({ role: "admin" }) - Ensures the user has an admin role to access this route.
  */
 userRouter.get("/", verifyToken({ role: "admin" }), getUsers);
+
+/**
+ * @route GET /search
+ * @description Search users by username for the Discover page.
+ * @middleware verifyToken() - Ensures the user is authenticated.
+ */
+userRouter.get("/search", verifyToken(), searchUsers);
 
 /**
  * @route GET /public/:id

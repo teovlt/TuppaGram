@@ -6,4 +6,7 @@ export interface IPost extends Document {
   photos: string[];
   author: mongoose.Types.ObjectId;
   recipeRef?: mongoose.Types.ObjectId;
+  tags: string[];
+  location: string;
+  visibility: "public" | "friends" | "private";
 }

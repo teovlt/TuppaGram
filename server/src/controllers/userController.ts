@@ -26,6 +26,42 @@ export const getUserById = async (req: Request, res: Response): Promise<void> =>
 };
 
 /**
+ * @function searchUsers
+ * @description Search users by username (case-insensitive partial match).
+ * @returns {Object} JSON response with a list of matching users.
+ */
+export const searchUsers = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { q, page = 1 } = req.query;
+    const limit = 10;
+    const skip = (Number(page) - 1) * limit;
+
+    const currentUserId = req.userId;
+    const query: any = { _id: { $ne: currentUserId } };
+
+    if (q && typeof q === "string" && q.trim().length >= 2) {
+      query.username = { $regex: q.trim(), $options: "i" };
+    } else if (q && typeof q === "string") {
+      res.status(200).json({ users: [], hasMore: false });
+      return;
+    }
+
+    const users = await User.find(query)
+      .select("username avatar fullname bio")
+      .sort({ username: 1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await User.countDocuments(query);
+    const hasMore = total > skip + users.length;
+
+    res.status(200).json({ users, hasMore });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
  * @function getUsers
  * @description Retrieves all users sorted by creation date.
  * @returns {Object} JSON response with a list of users or error message.

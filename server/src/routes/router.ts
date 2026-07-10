@@ -9,6 +9,7 @@ import postRoutes from "./postRoutes.js";
 import interactionRoutes from "./interactionRoutes.js";
 import notificationRoutes from "./notificationRoutes.js";
 import reportRoutes from "./reportRoutes.js";
+import friendshipRoutes from "./friendshipRoutes.js";
 
 import path from "path";
 import { fileURLToPath } from "url";
@@ -32,6 +33,7 @@ router.use("/api/posts", postRoutes);
 router.use("/api/interactions", interactionRoutes);
 router.use("/api/notifications", notificationRoutes);
 router.use("/api/reports", reportRoutes);
+router.use("/api/friendships", friendshipRoutes);
 
 /**
  * @route GET /api/ping

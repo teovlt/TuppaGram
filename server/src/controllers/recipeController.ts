@@ -5,7 +5,23 @@ import { User } from "../models/userModel.js";
 // Create a new recipe
 export const createRecipe = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { title, description, ingredients, steps, preparationTime, estimatedPrice, type, diet, difficulty, photos, isPublic } = req.body;
+    const {
+      title,
+      description,
+      ingredients,
+      steps,
+      preparationTime,
+      cookingTime,
+      servings,
+      estimatedPrice,
+      type,
+      cuisine,
+      diet,
+      difficulty,
+      photos,
+      isPublic,
+      tips,
+    } = req.body;
     const authorId = req.userId;
 
     const newRecipe = new Recipe({
@@ -14,13 +30,17 @@ export const createRecipe = async (req: Request, res: Response): Promise<void> =
       ingredients,
       steps,
       preparationTime,
+      cookingTime: cookingTime || 0,
+      servings: servings || 2,
       estimatedPrice,
       type,
+      cuisine: cuisine || "",
       diet,
       difficulty,
       photos,
       author: authorId,
       isPublic,
+      tips: tips || "",
     });
 
     await newRecipe.save();
@@ -33,20 +53,25 @@ export const createRecipe = async (req: Request, res: Response): Promise<void> =
 // Get all public recipes (with search & filters)
 export const getPublicRecipes = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { search, type, diet, difficulty, maxPrice, maxTime } = req.query;
+    const { search, type, diet, difficulty, cuisine, maxTime } = req.query;
 
     const query: any = { isPublic: true };
 
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: "i" } },
-        { ingredients: { $regex: search, $options: "i" } }
+        { ingredients: { $regex: search, $options: "i" } },
+        { cuisine: { $regex: search, $options: "i" } },
       ];
     }
     if (type) query.type = type;
     if (diet) query.diet = { $in: Array.isArray(diet) ? diet : [diet] };
     if (difficulty) query.difficulty = difficulty;
-    // Add additional logic if needed for price/time
+    if (cuisine) query.cuisine = cuisine;
+    if (maxTime) {
+      const max = Number(maxTime);
+      query.$expr = { $lte: [{ $add: ["$preparationTime", "$cookingTime"] }, max] };
+    }
 
     const recipes = await Recipe.find(query)
       .populate("author", "username avatar fullname")

@@ -5,6 +5,7 @@ import { Home } from "@/pages/Home";
 import { RecipesIndex } from "@/pages/Recipes/index";
 import { RecipeDetail } from "@/pages/Recipes/detail";
 import { CreateContentIndex } from "@/pages/Create/index";
+import { EditRecipe } from "@/pages/Create/editRecipe";
 import { Profile } from "@/pages/Profile/index";
 import { Index } from "@/pages/Admin";
 import { Logs } from "@/pages/Admin/components/logs";
@@ -91,6 +92,14 @@ export const Router = () => {
           element={
             <ProtectedRoute authRequired={true}>
               <CreateContentIndex />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/recipes/:id/edit"
+          element={
+            <ProtectedRoute authRequired={true}>
+              <EditRecipe />
             </ProtectedRoute>
           }
         />

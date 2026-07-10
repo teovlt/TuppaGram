@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Star, Bookmark, ShoppingCart, Clock, ChefHat, Tag, Users, Lightbulb, ChevronLeft, ChevronRight, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { Loading } from "@/components/customs/loading";
+import { useAuthContext } from "@/contexts/authContext";
+import { Edit2 } from "lucide-react";
 
 const difficultyColors: Record<string, string> = {
   Easy: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
@@ -22,6 +24,7 @@ const difficultyLabels: Record<string, string> = {
 
 export const RecipeDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const { authUser } = useAuthContext();
   const [recipe, setRecipe] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isBookmarked, setIsBookmarked] = useState(false);
@@ -113,9 +116,18 @@ export const RecipeDetail = () => {
         <div className="flex flex-col justify-center flex-1 space-y-4">
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold md:text-5xl">{recipe.title}</h1>
-            <Button variant="ghost" size="icon" onClick={handleBookmark}>
-              <Bookmark className={isBookmarked ? "fill-current text-accent" : ""} />
-            </Button>
+            <div className="flex gap-2">
+              {authUser?._id === recipe.author?._id && (
+                <Link to={`/recipes/${recipe._id}/edit`}>
+                  <Button variant="outline" size="icon">
+                    <Edit2 size={18} />
+                  </Button>
+                </Link>
+              )}
+              <Button variant="ghost" size="icon" onClick={handleBookmark}>
+                <Bookmark className={isBookmarked ? "fill-current text-accent" : ""} />
+              </Button>
+            </div>
           </div>
           <p className="text-lg text-muted-foreground">{recipe.description}</p>
 

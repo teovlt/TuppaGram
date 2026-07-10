@@ -47,37 +47,49 @@ interface RecipeStep {
   duration: string; // stored as string for input, converted to number on submit
 }
 
-export const CreateRecipeForm = () => {
+export const CreateRecipeForm = ({
+  initialData,
+  recipeId,
+}: {
+  initialData?: any;
+  recipeId?: string;
+}) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [currentSection, setCurrentSection] = useState(0);
 
   // Basic info
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [cuisine, setCuisine] = useState("");
-  const [type, setType] = useState("Main Course");
+  const [title, setTitle] = useState(initialData?.title || "");
+  const [description, setDescription] = useState(initialData?.description || "");
+  const [cuisine, setCuisine] = useState(initialData?.cuisine || "");
+  const [type, setType] = useState(initialData?.type || "Main Course");
 
   // Time & difficulty
-  const [preparationTime, setPreparationTime] = useState("");
-  const [cookingTime, setCookingTime] = useState("");
-  const [servings, setServings] = useState("2");
-  const [difficulty, setDifficulty] = useState("Medium");
-  const [estimatedPrice, setEstimatedPrice] = useState("$$");
+  const [preparationTime, setPreparationTime] = useState(initialData?.preparationTime?.toString() || "");
+  const [cookingTime, setCookingTime] = useState(initialData?.cookingTime?.toString() || "");
+  const [servings, setServings] = useState(initialData?.servings?.toString() || "2");
+  const [difficulty, setDifficulty] = useState(initialData?.difficulty || "Medium");
+  const [estimatedPrice, setEstimatedPrice] = useState(initialData?.estimatedPrice || "$$");
 
   // Ingredients & steps
-  const [ingredients, setIngredients] = useState<string[]>([""]);
-  const [steps, setSteps] = useState<RecipeStep[]>([{ text: "", duration: "" }]);
+  const [ingredients, setIngredients] = useState<string[]>(
+    initialData?.ingredients?.length > 0 ? initialData.ingredients : [""]
+  );
+  const [steps, setSteps] = useState<RecipeStep[]>(
+    initialData?.steps?.length > 0 
+      ? initialData.steps.map((s: any) => ({ text: s.text, duration: s.duration?.toString() || "" }))
+      : [{ text: "", duration: "" }]
+  );
 
   // Diet tags
-  const [diet, setDiet] = useState<string[]>([]);
+  const [diet, setDiet] = useState<string[]>(initialData?.diet || []);
 
   // Photos
-  const [photoUrls, setPhotoUrls] = useState<string[]>([]);
+  const [photoUrls, setPhotoUrls] = useState<string[]>(initialData?.photos || []);
 
   // Visibility & notes
-  const [isPublic, setIsPublic] = useState(true);
-  const [tips, setTips] = useState("");
+  const [isPublic, setIsPublic] = useState(initialData?.isPublic ?? true);
+  const [tips, setTips] = useState(initialData?.tips || "");
 
   // Validation
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -213,11 +225,17 @@ export const CreateRecipeForm = () => {
         tips: tips.trim(),
       };
 
-      const res = await axiosConfig.post("/recipes", payload);
-      toast.success("Recette créée avec succès !");
-      navigate(`/recipes/${res.data.recipe._id}`);
+      if (recipeId) {
+        await axiosConfig.put(`/recipes/${recipeId}`, payload);
+        toast.success("Recette mise à jour avec succès !");
+        navigate(`/recipes/${recipeId}`);
+      } else {
+        const res = await axiosConfig.post("/recipes", payload);
+        toast.success("Recette créée avec succès !");
+        navigate(`/recipes/${res.data.recipe._id}`);
+      }
     } catch (error: any) {
-      toast.error(error.response?.data?.error || "Erreur lors de la création");
+      toast.error(error.response?.data?.error || "Erreur lors de la création/mise à jour");
     } finally {
       setLoading(false);
     }

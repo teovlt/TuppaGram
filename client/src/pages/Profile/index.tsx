@@ -22,7 +22,7 @@ import { z } from "zod";
 import { updateAccountSchema } from "@/lib/zod/schemas/account/zod";
 import { InputFile } from "@/components/customs/inputFile";
 import { FriendsList } from "@/pages/Profile/components/FriendsList";
-import { PendingRequests } from "@/pages/Profile/components/PendingRequests";
+import { FavoriteRecipes } from "@/pages/Profile/components/FavoriteRecipes";
 
 export const Profile = () => {
   const { id } = useParams<{ id: string }>();
@@ -268,9 +268,10 @@ export const Profile = () => {
 
       {/* Tabs for Posts, Recipes, Settings */}
       <Tabs defaultValue="posts" className="w-full mt-8">
-        <TabsList className={`grid w-full mb-8 ${isOwnProfile ? "grid-cols-3" : "grid-cols-2"}`}>
+        <TabsList className={`grid w-full mb-8 ${isOwnProfile ? "grid-cols-4" : "grid-cols-2"}`}>
           <TabsTrigger value="posts">Publications</TabsTrigger>
           <TabsTrigger value="recipes">Recettes</TabsTrigger>
+          {isOwnProfile && <TabsTrigger value="favorites">Favoris</TabsTrigger>}
           {isOwnProfile && <TabsTrigger value="settings">Paramètres</TabsTrigger>}
         </TabsList>
         
@@ -323,7 +324,11 @@ export const Profile = () => {
           </div>
         </TabsContent>
 
-
+        {isOwnProfile && (
+          <TabsContent value="favorites">
+            <FavoriteRecipes />
+          </TabsContent>
+        )}
 
         {isOwnProfile && (
           <TabsContent value="settings">
@@ -389,7 +394,8 @@ export const Profile = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Nom d'utilisateur</FormLabel>
-                      <FormControl><Input placeholder="john_doe" {...field} /></FormControl>
+                      <FormControl><Input placeholder="john_doe" {...field} disabled /></FormControl>
+                      <p className="text-xs text-muted-foreground">Le nom d'utilisateur ne peut pas être modifié.</p>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -400,7 +406,8 @@ export const Profile = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Email</FormLabel>
-                      <FormControl><Input placeholder="john@example.com" {...field} /></FormControl>
+                      <FormControl><Input placeholder="john@example.com" {...field} disabled /></FormControl>
+                      <p className="text-xs text-muted-foreground">L'adresse email ne peut pas être modifiée.</p>
                       <FormMessage />
                     </FormItem>
                   )}

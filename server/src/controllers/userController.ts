@@ -194,6 +194,8 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
     } else {
       delete req.body.role;
       delete req.body.password;
+      delete req.body.username;
+      delete req.body.email;
     }
 
     const user = await User.findOneAndUpdate(

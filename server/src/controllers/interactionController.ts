@@ -141,7 +141,7 @@ export const toggleBookmark = async (req: Request, res: Response): Promise<void>
 export const getBookmarks = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = req.userId;
-    const bookmarks = await Bookmark.find({ user: userId }).populate("recipe", "title photos averageRating");
+    const bookmarks = await Bookmark.find({ user: userId }).populate("recipe", "title photos averageRating preparationTime cookingTime");
     res.status(200).json({ bookmarks });
   } catch (error: any) {
     res.status(500).json({ error: error.message });

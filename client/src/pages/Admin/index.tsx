@@ -9,6 +9,8 @@ const segmentLabels: Record<string, string> = {
   admin: "Admin",
   dashboard: "Tableau de bord",
   users: "Utilisateurs",
+  recipes: "Recettes",
+  posts: "Publications",
   logs: "Journaux",
 };
 

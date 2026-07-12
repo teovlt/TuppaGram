@@ -7,9 +7,13 @@ import {
   updateRecipe,
   deleteRecipe,
   getUserRecipes,
+  getAllRecipesAdmin,
 } from "../controllers/recipeController.js";
 
 const router = express.Router();
+
+// Admin routes
+router.get("/admin/all", verifyToken(), getAllRecipesAdmin);
 
 // Public routes
 router.get("/", getPublicRecipes);

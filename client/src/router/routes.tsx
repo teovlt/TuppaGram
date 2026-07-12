@@ -10,6 +10,8 @@ import { Profile } from "@/pages/Profile/index";
 import { Index } from "@/pages/Admin";
 import { Logs } from "@/pages/Admin/components/logs";
 import { Users } from "@/pages/Admin/components/users";
+import { AdminRecipes } from "@/pages/Admin/components/recipes";
+import { AdminPosts } from "@/pages/Admin/components/posts";
 import { Dashboard } from "@/pages/Admin/components/dashboard";
 import { Login } from "@/pages/Authentication/login";
 import { Register } from "@/pages/Authentication/register";
@@ -57,6 +59,8 @@ export const Router = () => {
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="users" element={<Users />} />
+          <Route path="recipes" element={<AdminRecipes />} />
+          <Route path="posts" element={<AdminPosts />} />
           <Route path="logs" element={<Logs />} />
 
         </Route>

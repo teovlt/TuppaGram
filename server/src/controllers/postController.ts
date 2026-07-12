@@ -3,6 +3,7 @@ import { Post } from "../models/postModel.js";
 import { User } from "../models/userModel.js";
 import { Notification } from "../models/notificationModel.js";
 import { getAcceptedFriendIds } from "./friendshipController.js";
+import { userRoles } from "../utils/enums/userRoles.js";
 
 export const createPost = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -102,7 +103,10 @@ export const deletePost = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
-    if (!post.author.equals(req.userId)) {
+    const user = await User.findById(req.userId);
+    const isAdmin = user?.role === userRoles.ADMIN;
+
+    if (!post.author.equals(req.userId) && !isAdmin) {
       res.status(403).json({ error: "Non autorisé" });
       return;
     }
@@ -172,6 +176,33 @@ export const getUserPosts = async (req: Request, res: Response): Promise<void> =
       .populate("recipeRef", "title photos")
       .sort({ createdAt: -1 });
     res.status(200).json({ posts });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Admin: Get all posts
+export const getAllPostsAdmin = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const page = parseInt(req.query.page as string) || 0;
+    const size = parseInt(req.query.size as string) || 10;
+    const skip = page * size;
+
+    const user = await User.findById(req.userId);
+    if (user?.role !== userRoles.ADMIN) {
+      res.status(403).json({ error: "Accès refusé" });
+      return;
+    }
+
+    const posts = await Post.find()
+      .populate("author", "username")
+      .populate("recipeRef", "title")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(size);
+    const count = await Post.countDocuments();
+
+    res.status(200).json({ posts, count });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }

@@ -7,9 +7,13 @@ import {
   deletePost,
   getUserPosts,
   updatePost,
+  getAllPostsAdmin,
 } from "../controllers/postController.js";
 
 const router = express.Router();
+
+// Admin routes
+router.get("/admin/all", verifyToken(), getAllPostsAdmin);
 
 // Protected feed & post creation
 router.get("/feed", verifyToken(), getFeed);

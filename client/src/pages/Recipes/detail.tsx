@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { axiosConfig } from "@/config/axiosConfig";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -8,7 +8,8 @@ import { Star, Bookmark, ShoppingCart, Clock, ChefHat, Tag, Users, Lightbulb, Ch
 import { toast } from "sonner";
 import { Loading } from "@/components/customs/loading";
 import { useAuthContext } from "@/contexts/authContext";
-import { Edit2 } from "lucide-react";
+import { Edit2, Trash2 } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const difficultyColors: Record<string, string> = {
   Easy: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
@@ -29,6 +30,8 @@ export const RecipeDetail = () => {
   const [loading, setLoading] = useState(true);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -58,7 +61,17 @@ export const RecipeDetail = () => {
     const existing = JSON.parse(localStorage.getItem("groceryList") || "[]");
     const updated = [...existing, ...(recipe?.ingredients || [])];
     localStorage.setItem("groceryList", JSON.stringify(updated));
-    toast.success("Ingrédients ajoutés à la liste de courses !");
+    toast.success("Ingrédients ajoutés à la liste de courses");
+  };
+
+  const handleDelete = async () => {
+    try {
+      await axiosConfig.delete(`/recipes/${id}`);
+      toast.success("Recette supprimée avec succès");
+      navigate("/profile");
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || "Erreur lors de la suppression");
+    }
   };
 
   if (loading) return <Loading />;
@@ -118,11 +131,16 @@ export const RecipeDetail = () => {
             <h1 className="text-3xl font-bold md:text-5xl">{recipe.title}</h1>
             <div className="flex gap-2">
               {authUser?._id === recipe.author?._id && (
-                <Link to={`/recipes/${recipe._id}/edit`}>
-                  <Button variant="outline" size="icon">
-                    <Edit2 size={18} />
+                <>
+                  <Link to={`/recipes/${recipe._id}/edit`}>
+                    <Button variant="outline" size="icon">
+                      <Edit2 size={18} />
+                    </Button>
+                  </Link>
+                  <Button variant="destructive" size="icon" onClick={() => setDeleteDialogOpen(true)}>
+                    <Trash2 size={18} />
                   </Button>
-                </Link>
+                </>
               )}
               <Button variant="ghost" size="icon" onClick={handleBookmark}>
                 <Bookmark className={isBookmarked ? "fill-current text-accent" : ""} />
@@ -259,6 +277,21 @@ export const RecipeDetail = () => {
           </div>
         </>
       )}
+
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Supprimer la recette</DialogTitle>
+            <DialogDescription>
+              Êtes-vous sûr de vouloir supprimer cette recette ? Cette action est irréversible.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>Annuler</Button>
+            <Button variant="destructive" onClick={handleDelete}>Supprimer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

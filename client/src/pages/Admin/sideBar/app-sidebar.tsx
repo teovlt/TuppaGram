@@ -12,6 +12,8 @@ const adminMenus = {
   navMain: [
     { title: "Tableau de bord", icon: Presentation, url: "/admin/dashboard", isActive: true },
     { title: "Utilisateurs", icon: UsersIcon, url: "/admin/users" },
+    { title: "Recettes", icon: NotebookText, url: "/admin/recipes" },
+    { title: "Publications", icon: NotebookText, url: "/admin/posts" },
     { title: "Journaux", icon: NotebookText, url: "/admin/logs" },
   ],
 };
